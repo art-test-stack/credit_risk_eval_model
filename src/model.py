@@ -12,7 +12,11 @@ class CoreNLP:
 class GloVe:
     pass
 
-class Model(nn.Module):
+class CREModel(nn.Module):
+    """
+    Credit risk evaluation model with textual features from loan descriptions for P2P lending
+    
+    """
     def __init__(
             self, 
             d_model: int, 

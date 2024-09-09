@@ -1,6 +1,6 @@
-[submodule "model/GloVe"]
+[submodule "src/GloVe"]
 	path = model/GloVe
 	url = git@github.com:stanfordnlp/GloVe.git
-[submodule "model/CoreNLP"]
+[submodule "src/CoreNLP"]
 	path = model/CoreNLP
 	url = git@github.com:stanfordnlp/CoreNLP.git
