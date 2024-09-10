@@ -37,3 +37,5 @@ def preprocess_data(file_path: Union[str, Path] = "data/accepted_2007_to_2018Q4.
 
     print("\nWithout")
     print_stats(res)
+
+    return res
