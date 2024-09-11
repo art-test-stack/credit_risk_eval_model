@@ -1,9 +1,26 @@
-from src.data.features import features
+from src.data.features import features, features_pre_processing
 
 import pandas as pd
 
+import math
 from pathlib import Path
 from typing import Union
+
+
+convert_months = {
+    "Jan": 1,
+    "Feb": 2,
+    "Mar": 3,
+    "Apr": 4,
+    "May": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Oct": 10,
+    "Nov": 11,
+    "Dec": 12,
+}
 
 
 def print_stats(df: pd.DataFrame) -> None:
@@ -19,23 +36,37 @@ def preprocess_data(file_path: Union[str, Path] = "data/accepted_2007_to_2018Q4.
     raw = pd.read_csv(file_path)
 
     raw["desc_len"] = raw.dropna(subset="desc")["desc"].apply(lambda x: len(str(x).split()))
+    raw = raw.dropna(subset=list(features_pre_processing.keys()))
 
-    res = list(map(lambda x: str(x).split("-"), raw["issue_d"].values.tolist()))
-    not_nan_dates = [ date for date in res if 'nan' not in date ]
-    args = [ idx for idx, [_, y] in enumerate(not_nan_dates) if int(y) <= 2014 and int(y) >= 2007]
+    raw = raw[raw["desc_len"] > 20]
 
-    res = raw.iloc[args]
-    res = res[res["desc_len"] > 20]
-    _res = res[features.keys()].dropna()
+    # COMPUTE fico
+    raw["fico"] = (raw["fico_range_high"] - raw["fico_range_low"]) / 2
 
-    print("With total_il_high_credit_limit and revol_util features")
-    print_stats(_res)
 
-    features.pop("total_il_high_credit_limit")
-    features.pop("revol_util") 
-    res = res[features.keys()].dropna()
+    # COMPUTE "revol_inc_rat"
+    # revol_inc_rat = revolving credit balance /  borrower’s monthly income
+    raw["revol_inc_rat"] = (raw["revol_bal"] / (raw["annual_inc"] / 12)) # .apply(lambda x: math.log(x))
 
-    print("\nWithout")
+    # COMPUTE "credit_age"
+    get_month = lambda x: int(convert_months[str(x).split("-")[0]])
+    get_year = lambda x: int(str(x).split("-")[1])
+
+    raw["issue_d_m"] = raw["issue_d"].apply(get_month)
+    raw["issue_d_y"] = raw["issue_d"].apply(get_year)
+    raw = raw[(raw["issue_d_y"] >= 2007) & (raw["issue_d_y"] < 2014)]
+
+    raw["earliest_cr_line_m"] = raw["earliest_cr_line"].apply(get_month)
+    raw["earliest_cr_line_y"] = raw["earliest_cr_line"].apply(get_year)
+    raw["credit_age"] = (raw["issue_d_y"] - raw["earliest_cr_line_y"]) * 12 + raw["issue_d_m"] - raw["earliest_cr_line_m"]
+
+    # COMPUTE LOG VALUES
+    raw["log_loan_amnt"] = raw["loan_amnt"].apply(lambda x: math.log(x))
+    raw["log_annual_inc"] = raw["annual_inc"].apply(lambda x: math.log(x))
+
+    # Select only interesting features
+    res = raw[list(features.keys())]
+
     print_stats(res)
 
     return res
