@@ -1,11 +1,27 @@
 import pandas as pd
 from enum import Enum
+import math
+
 
 class DataType(Enum):
     CATEGORICAL = "cat"
     NUMERICAL = "num"
     NUMERICAL_LOG = "num_log"
 
+convert_months = {
+    "Jan": 1,
+    "Feb": 2,
+    "Mar": 3,
+    "Apr": 4,
+    "May": 5,
+    "Jun": 6,
+    "Jul": 7,
+    "Aug": 8,
+    "Sep": 9,
+    "Oct": 10,
+    "Nov": 11,
+    "Dec": 12,
+}
 
 features_pre_processing = {
     # TARGET VARIABLE
@@ -46,20 +62,20 @@ features_pre_processing = {
     "desc_len": DataType.NUMERICAL
 }
 
-features = {
-    # TARGET VARIABLE
-    "loan_status": DataType.CATEGORICAL, # 
+# TARGET VARIABLE
+target_variable = {"loan_status": DataType.CATEGORICAL,}
 
-    # LOAN CHARACTERISTICS
+# LOAN CHARACTERISTICS
+loan_charac_features = {
     "log_loan_amnt": DataType.NUMERICAL_LOG,
     "term": DataType.CATEGORICAL, # 36, 60
     "int_rate": DataType.NUMERICAL,
     "purpose": DataType.CATEGORICAL, # "credit_card", "debt_consolidation", "educational", "major_purchase", "small_business", and "all_other"
+}
 
-    # CREDITWORTHINESS FEATURES
+# CREDITWORTHINESS FEATURES
+credit_worthiness_features = {
     "fico": DataType.NUMERICAL,
-    # "fico_range_low": DataType.NUMERICAL, # temporary
-    # "fico_range_high": DataType.NUMERICAL, # temporary
     "grade": DataType.CATEGORICAL, # = "credit_level": DataType.CATEGORICAL,
     "inq_last_6mths": DataType.NUMERICAL,
     "revol_util": DataType.NUMERICAL,
@@ -69,14 +85,58 @@ features = {
     "revol_inc_rat": DataType.NUMERICAL,
     "total_acc": DataType.NUMERICAL,
     "credit_age": DataType.NUMERICAL, # earliest_cr_line - issue_d
+}
 
-    # SOLVENCY FEATURES
+# SOLVENCY FEATURES
+solvency_features = {
     "log_annual_inc": DataType.NUMERICAL_LOG, # log.annual.inc
     "emp_length": DataType.NUMERICAL,
     "home_ownership": DataType.CATEGORICAL, # RENT, OWN, MORTGAGE, OTHER
     "verification_status": DataType.CATEGORICAL,
     "dti": DataType.NUMERICAL,
+}
 
-    # DESCRIPTION FEATURE
+# DESCRIPTION FEATURE
+desc_features = {
+    # "desc": str,
     "desc_len": DataType.NUMERICAL
 }
+
+features = target_variable | loan_charac_features | credit_worthiness_features | solvency_features | desc_features
+  
+def select_features(df: pd.DataFrame) -> pd.DataFrame:
+    raw = df.copy()
+
+    raw["desc_len"] = raw.dropna(subset="desc")["desc"].apply(lambda x: len(str(x).split()))
+    raw = raw.dropna(subset=list(features_pre_processing.keys()))
+
+    raw = raw[raw["desc_len"] > 20]
+
+    # COMPUTE fico
+    raw["fico"] = (raw["fico_range_high"] - raw["fico_range_low"]) / 2
+
+
+    # COMPUTE "revol_inc_rat"
+    # revol_inc_rat = revolving credit balance /  borrower’s monthly income
+    raw["revol_inc_rat"] = (raw["revol_bal"] / (raw["annual_inc"] / 12)) # .apply(lambda x: math.log(x))
+
+    # COMPUTE "credit_age"
+    get_month = lambda x: int(convert_months[str(x).split("-")[0]])
+    get_year = lambda x: int(str(x).split("-")[1])
+
+    raw["issue_d_m"] = raw["issue_d"].apply(get_month)
+    raw["issue_d_y"] = raw["issue_d"].apply(get_year)
+    raw = raw[(raw["issue_d_y"] >= 2007) & (raw["issue_d_y"] < 2014)]
+
+    raw["earliest_cr_line_m"] = raw["earliest_cr_line"].apply(get_month)
+    raw["earliest_cr_line_y"] = raw["earliest_cr_line"].apply(get_year)
+    raw["credit_age"] = (raw["issue_d_y"] - raw["earliest_cr_line_y"]) * 12 + raw["issue_d_m"] - raw["earliest_cr_line_m"]
+
+    # COMPUTE LOG VALUES
+    raw["log_loan_amnt"] = raw["loan_amnt"].apply(lambda x: math.log(x))
+    raw["log_annual_inc"] = raw["annual_inc"].apply(lambda x: math.log(x))
+
+    # Select only interesting features
+    res = raw[list(features.keys())]
+
+    return res
