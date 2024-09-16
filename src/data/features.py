@@ -7,6 +7,7 @@ class DataType(Enum):
     CATEGORICAL = "cat"
     NUMERICAL = "num"
     NUMERICAL_LOG = "num_log"
+    TEXTUAL = "text"
 
 convert_months = {
     "Jan": 1,
@@ -98,13 +99,13 @@ solvency_features = {
 
 # DESCRIPTION FEATURE
 desc_features = {
-    # "desc": str,
+    "desc": str,
     "desc_len": DataType.NUMERICAL
 }
 
 features = target_variable | loan_charac_features | credit_worthiness_features | solvency_features | desc_features
   
-def select_features(df: pd.DataFrame) -> pd.DataFrame:
+def select_features(df: pd.DataFrame, one_hot_output: bool = True) -> pd.DataFrame:
     raw = df.copy()
 
     raw["desc_len"] = raw.dropna(subset="desc")["desc"].apply(lambda x: len(str(x).split()))
@@ -113,7 +114,7 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
     raw = raw[raw["desc_len"] > 20]
 
     # COMPUTE fico
-    raw["fico"] = (raw["fico_range_high"] - raw["fico_range_low"]) / 2
+    raw["fico"] = (raw["fico_range_high"] + raw["fico_range_low"]) / 2 # or raw["fico_range_high"] 
 
 
     # COMPUTE "revol_inc_rat"
@@ -136,7 +137,18 @@ def select_features(df: pd.DataFrame) -> pd.DataFrame:
     raw["log_loan_amnt"] = raw["loan_amnt"].apply(lambda x: math.log(x))
     raw["log_annual_inc"] = raw["annual_inc"].apply(lambda x: math.log(x))
 
+    # CONVERT EMP LENGTH
+    def convert_emp_length(emp_len: str) -> int:
+        for k in range(1, 11):
+            if str(k) in emp_len:
+                return k
+    raw["emp_length"] = raw["emp_length"].apply(convert_emp_length)
+
     # Select only interesting features
     res = raw[list(features.keys())]
+    
+    if one_hot_output:
+        res = res[res["loan_status"].apply(lambda x: x in ["Fully Paid", "Charged Off"])]
+        res["loan_status"] = res["loan_status"].apply(lambda x: 1 if x == "Fully Paid" else 0)
 
     return res
