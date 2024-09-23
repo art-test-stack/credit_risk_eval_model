@@ -6,6 +6,8 @@ notes.md
 notebooks/
 archives/
 
+*.props
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
