@@ -35,7 +35,7 @@ class CoreNLP:
         )
 
     def __call__(self, text) -> Any:
-        return self.forward()
+        return self.forward(text)
     
     def forward(self, text) -> List[str]:
         with self.client as client:
