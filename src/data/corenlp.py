@@ -1,8 +1,8 @@
 import stanza
 from stanza.server import CoreNLPClient
 
-
-from typing import Any, List
+# import pandas as pd
+from typing import Any, List, Union
 
 
 # May use the package for finance :
@@ -20,25 +20,38 @@ from typing import Any, List
 class CoreNLP:
     def __init__(
             self,
-            annotators: List[str] = ['tokenize','ssplit','pos','lemma'],
+            annotators: List[str] = ['regexner', 'tokenize', 'cleanxml', 'lemma','sentiment', 'dcoref'],
+            # annotators: List[str] = ['tokenize','ssplit','pos','lemma'],
             memory: str = '6G',
             endpoint: str = "http://localhost:8000",
+            timeout: int = 30000,
+            threads: int = 5,
         ) -> None:
         # download English model
         stanza.download('en')
+        self.annotators = annotators
         self.client = CoreNLPClient(
             annotators=annotators,
             # annotators=['tokenize','ssplit','pos','lemma','ner', 'parse', 'depparse','coref'],
-            # timeout=30000,
+            timeout=timeout,
             memory=memory,
             endpoint=endpoint,
+            threads=threads,
         )
 
-    def __call__(self, text) -> Any:
+    def __call__(self, text: str | List[str]) -> Union[List[str], List[List[str]]]:
         return self.forward(text)
     
-    def forward(self, text) -> List[str]:
+    def forward(self, text:  str | List[str]) -> Union[List[str], List[List[str]]]:
         with self.client as client:
-            ann = client.annotate(text)
+            if type(text) == str:
+                res = self._call_client(text, client)
+            else:
+                res = [ self._call_client(t, client) for t in text ]
+
+        return res
+    
+    def _call_client(self, text: str, client: CoreNLPClient) -> List[str]:
+        ann = client.annotate(text)
 
         return [tok.value for sentence in ann.sentence for tok in sentence.token]
