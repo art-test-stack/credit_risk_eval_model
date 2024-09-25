@@ -5,12 +5,13 @@ import spacy
 import numpy as np
 import torch
 
+# TODO: rm stopwords + ponctuation
 
 class GloVe:
     def __init__(self, model: str = "en_core_web_lg") -> None:
     
         self.model = spacy.load(model)
-        pass
+        
 
     def __call__(self, tokens: List[str], to_tensor: bool = True) -> Union[np.ndarray, torch.Tensor]:
         return self.forward(tokens)

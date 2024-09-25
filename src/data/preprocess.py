@@ -63,7 +63,7 @@ def preprocess_textual_feature(
     return embeddings
 
 
-def split_data(df: pd.DataFrame, get_dev_set: bool = False) -> pd.DataFrame:
+def split_data(df: pd.DataFrame, get_dev_set: bool = True) -> pd.DataFrame:
     df = df.copy()
     ftrs = list(features.copy().keys())
     ftrs.remove("loan_status")
@@ -75,6 +75,7 @@ def split_data(df: pd.DataFrame, get_dev_set: bool = False) -> pd.DataFrame:
 
     else:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.1, shuffle=False)
+        return X_train, X_test, y_train, y_test,
 
     return X_train, X_dev, X_test, y_train, y_dev, y_test
 
@@ -97,11 +98,20 @@ def normalize(
     return X_train, X_test, X_dev
 
 
+def sample_training_data(
+        X_train: pd.DataFrame, 
+        train_desc: torch.Tensor, 
+        y_train: pd.DataFrame
+    ) -> Tuple[pd.DataFrame,torch.Tensor, pd.DataFrame]:
+    # TODO
+    return X_train, train_desc, y_train
+
+
 def preprocess_data(
         file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
-        get_dev_set: bool = False,
         seg_model: CoreNLP = CoreNLP(), 
-        emb_model: GloVe = GloVe()
+        emb_model: GloVe = GloVe(),
+        concat_train_dev_sets: bool = False,
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
@@ -109,14 +119,19 @@ def preprocess_data(
 
     hard = preprocess_hard_features(df)
 
-    X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df, get_dev_set)
+    X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
     train_desc = preprocess_textual_feature(X_train)
-    if get_dev_set:
-        dev_desc = preprocess_textual_feature(X_dev)
+    # if get_dev_set:
+    dev_desc = preprocess_textual_feature(X_dev)
     test_desc = preprocess_textual_feature(X_train)
 
     X_train, X_test, X_dev = normalize(X_train, X_test, X_dev)
+
+    X_train, train_desc, y_train = sample_training_data(X_train, train_desc, y_train)
+
+    # CONCAT train & dev SERS
     # TO TENSOR
+
     return (X_train, train_desc, y_train), (X_test, test_desc, y_test), (X_dev, dev_desc, y_dev)
 
