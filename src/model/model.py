@@ -1,5 +1,5 @@
-from src.model.corenlp import CoreNLP
-from src.model.glove import GloVe
+from src.data.corenlp import CoreNLP
+from src.data.glove import GloVe
 from src.model.te import TransformerEncoder
 
 import torch
@@ -12,7 +12,6 @@ from typing import Callable, Union
 class CREModel(nn.Module):
     """
     Credit risk evaluation model with textual features from loan descriptions for P2P lending
-    
     """
     def __init__(
             self, 
@@ -37,15 +36,15 @@ class CREModel(nn.Module):
         self.dff = nn.Linear(dim_ffn, 2)
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, loans):
-        desc_text, hard_features = loans
+    def forward(self, emb: torch.Tensor, hard_ft: torch.Tensor) -> torch.Tensor:
+        # desc_text, hard_features = loans
 
-        seg_text = self.corenlp(desc_text)
-        emb = self.glove(seg_text, to_tensor=True)
+        # seg_text = self.corenlp(desc_text)
+        # emb = self.glove(seg_text, to_tensor=True)
 
         res_te = self.te(emb)
 
-        x_dff = torch.concat(res_te, hard_features, dim=1)
+        x_dff = torch.concat(res_te, hard_ft, dim=1)
         dff_out = self.dff(x_dff)
 
         return self.softmax(dff_out)
