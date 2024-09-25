@@ -1,10 +1,14 @@
 from src.data.features import select_features, DataType, features
+from src.data.corenlp import CoreNLP
+from src.data.glove import GloVe
 
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
 import math
+
+import torch
 from pathlib import Path
 from typing import Union
 
@@ -41,34 +45,51 @@ def preprocess_hard_features(df: pd.DataFrame) -> pd.DataFrame:
     return raw
 
  
-def preprocess_textual_feature(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_textual_feature(
+        df: pd.DataFrame, 
+        seg_model: CoreNLP = CoreNLP(), 
+        emb_model: GloVe = GloVe()
+    ) -> torch.Tensor:
+
     raw = df.copy()
-    desc = raw["desc"]
+    desc = raw["desc"].values
 
     # PREPROCESS HERE
+    segmented_text = seg_model(desc)
+    embeddings = emb_model(segmented_text, to_tensor=True) # B, S, D
 
-    raw["desc"] = desc
-    return raw
+    return embeddings
 
 
-def split_data(df: pd.DataFrame) -> pd.DataFrame:
+def split_data(df: pd.DataFrame, get_dev_set: bool = False) -> pd.DataFrame:
     df = df.copy()
     ftrs = list(features.copy().keys())
     ftrs.remove("loan_status")
     X, y = df[ftrs], df[["loan_status"]]
-    X_train, X_devtest, y_train, y_devtest = train_test_split(X, y, test_size=.2)
-    X_dev, X_test, y_dev, y_test = train_test_split(X_devtest, y_devtest, test_size=.5)
+    if get_dev_set:
+        X_train, X_devtest, y_train, y_devtest = train_test_split(X, y, test_size=.2, shuffle=False)
+        X_dev, X_test, y_dev, y_test = train_test_split(X_devtest, y_devtest, test_size=.5, shuffle=False)
+    else:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, shuffle=False)
 
     return X_train, X_dev, X_test, y_train, y_dev, y_test
 
 
-def preprocess_data(file_path: Union[str, Path] = "data/accepted_2007_to_2018Q4.csv") -> pd.DataFrame:
+def normalize(X_train, X_dev, X_test, y_train, y_dev, y_test) -> None:
+    pass
+
+
+def preprocess_data(file_path: Union[str, Path] = "data/accepted_2007_to_2018Q4.csv", get_dev_set: bool = False) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
     df = select_features(df)
 
-    X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
+    hard = preprocess_hard_features(df)
+    desc = preprocess_textual_feature(df)
 
-    df = preprocess_hard_features(df)
-    df = preprocess_textual_feature(df)
+    X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df, get_dev_set)
+
+    X_train, X_dev, X_test, y_train, y_dev, y_test = normalize(X_train, X_dev, X_test, y_train, y_dev, y_test)
+
+    return X_train, X_dev, X_test, y_train, y_dev, y_test 
 
