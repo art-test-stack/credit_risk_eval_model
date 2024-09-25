@@ -18,4 +18,15 @@ def pipeline(
         emb_model: GloVe = GloVe(),
     ) -> Any:
     
-    df = preprocess_data(loans_file)
+    train_set, test_set, _ = preprocess_data(loans_file, seg_model, emb_model)
+
+    X_train, train_desc, y_train = train_set
+    X_test, test_desc, y_test = test_set
+
+    # TODO:
+    # MODEL TRAINING
+    # TO device
+
+    # EVALUATION
+
+
