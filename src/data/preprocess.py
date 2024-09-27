@@ -14,6 +14,22 @@ from pathlib import Path
 from typing import Union, Tuple
 
 
+features_post_preprocessing = [
+    'loan_status', 'log_loan_amnt', 'int_rate', 'fico', 'inq_last_6mths',
+    'revol_util', 'delinq_2yrs', 'pub_rec', 'open_acc', 'revol_inc_rat',
+    'total_acc', 'credit_age', 'log_annual_inc', 'emp_length', 'dti',
+    'desc', 'desc_len', 'term_ 36 months', 'term_ 60 months', 'purpose_car',
+    'purpose_credit_card', 'purpose_debt_consolidation',
+    'purpose_educational', 'purpose_home_improvement', 'purpose_house',
+    'purpose_major_purchase', 'purpose_medical', 'purpose_moving',
+    'purpose_other', 'purpose_renewable_energy', 'purpose_small_business',
+    'purpose_vacation', 'purpose_wedding', 'grade_A', 'grade_B', 'grade_C',
+    'grade_D', 'grade_E', 'grade_F', 'grade_G', 'home_ownership_MORTGAGE',
+    'home_ownership_NONE', 'home_ownership_OTHER', 'home_ownership_OWN',
+    'home_ownership_RENT', 'verification_status_Not Verified',
+    'verification_status_Source Verified', 'verification_status_Verified'
+]
+# features_post_preprocessing.
 
 def print_stats(df: pd.DataFrame) -> None:
     df = df.copy()
@@ -28,8 +44,8 @@ def one_hot(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     cat_features = [ ft for ft, type in features.items() if type in [DataType.CATEGORICAL] and not ft == "loan_status"]
-    df = pd.get_dummies(df, columns=cat_features, drop_first=True)
-
+    df = pd.get_dummies(df, columns=cat_features)
+    
     return df
 
 
@@ -37,13 +53,14 @@ def preprocess_hard_features(df: pd.DataFrame) -> pd.DataFrame:
     raw = df.copy()
 
     hard_features = [ft for ft in df.columns if not features[ft] == DataType.TEXTUAL]
+    
     raw_hard = raw[hard_features]
 
     # PREPROCESS HERE
     df = one_hot(raw_hard)
 
-    raw[raw_hard] = raw_hard
-    return raw
+    df['desc'] = raw["desc"]
+    return df
 
  
 def preprocess_textual_feature(
@@ -65,7 +82,7 @@ def preprocess_textual_feature(
 
 def split_data(df: pd.DataFrame, get_dev_set: bool = True) -> pd.DataFrame:
     df = df.copy()
-    ftrs = list(features.copy().keys())
+    ftrs = features_post_preprocessing.copy()
     ftrs.remove("loan_status")
     X, y = df[ftrs], df[["loan_status"]]
 
@@ -98,7 +115,7 @@ def normalize(
     return X_train, X_test, X_dev
 
 
-def sample_training_data(
+def balance_training_data(
         X_train: pd.DataFrame, 
         train_desc: torch.Tensor, 
         y_train: pd.DataFrame
@@ -117,18 +134,17 @@ def preprocess_data(
 
     df = select_features(df)
 
-    hard = preprocess_hard_features(df)
+    df = preprocess_hard_features(df)
 
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
     train_desc = preprocess_textual_feature(X_train)
-    # if get_dev_set:
     dev_desc = preprocess_textual_feature(X_dev)
     test_desc = preprocess_textual_feature(X_train)
 
     X_train, X_test, X_dev = normalize(X_train, X_test, X_dev)
 
-    X_train, train_desc, y_train = sample_training_data(X_train, train_desc, y_train)
+    X_train, train_desc, y_train = balance_training_data(X_train, train_desc, y_train)
 
     # CONCAT train & dev SERS
     # TO TENSOR

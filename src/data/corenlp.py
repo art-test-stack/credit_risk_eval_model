@@ -24,7 +24,7 @@ class CoreNLP:
             # annotators: List[str] = ['tokenize','ssplit','pos','lemma'],
             memory: str = '6G',
             endpoint: str = "http://localhost:8000",
-            timeout: int = 30000,
+            timeout: int = 1_000_000,
             threads: int = 5,
         ) -> None:
         # download English model
