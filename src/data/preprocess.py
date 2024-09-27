@@ -45,7 +45,7 @@ def one_hot(df: pd.DataFrame) -> pd.DataFrame:
 
     cat_features = [ ft for ft, type in features.items() if type in [DataType.CATEGORICAL] and not ft == "loan_status"]
     df = pd.get_dummies(df, columns=cat_features)
-    
+
     return df
 
 
@@ -69,14 +69,14 @@ def preprocess_textual_feature(
         emb_model: GloVe = GloVe()
     ) -> torch.Tensor:
 
-    desc = df["desc"].values
-    df.drop(columns="desc", inplace=True)
+    # desc = df["desc"].values
+    # df.drop(columns="desc", inplace=True)
 
     # PREPROCESS HERE
-    segmented_text = seg_model(desc)
-    embeddings = emb_model(segmented_text, to_tensor=True) # B, S, D
+    # segmented_text = seg_model(desc)
+    # embeddings = emb_model(segmented_text, to_tensor=True) # B, S, D
     # pad all loan textual descriptions to include 200 terms for loan descriptions from LendingClub
-
+    embeddings = df["desc"].apply(lambda x: emb_model(seg_model(x))).values
     return embeddings
 
 
@@ -137,6 +137,8 @@ def preprocess_data(
     df = preprocess_hard_features(df)
 
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
+
+
 
     train_desc = preprocess_textual_feature(X_train)
     dev_desc = preprocess_textual_feature(X_dev)
