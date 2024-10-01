@@ -1,0 +1,8 @@
+torch
+spacy
+stanza
+pandas
+tqdm
+numpy
+imblearn
+scikit-learn
