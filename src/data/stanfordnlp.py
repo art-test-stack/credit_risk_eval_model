@@ -51,7 +51,7 @@ class StanfordNLP:
     def process_batch(
             self, 
             texts: List[str] | pd.Series | pd.DataFrame, 
-            max_workers: int = 4, 
+            max_workers: int | None = None, 
             parralize: bool = True
         ) -> np.ndarray:
         if isinstance(texts, pd.Series):
@@ -67,12 +67,24 @@ class StanfordNLP:
             res = np.array([ self(text) for text in tqdm(texts)])
         return res
     
-    def process_batch_cuda(self, texts: List[str], max_workers: int) -> np.ndarray:
+    def process_batch_cuda(self, texts: List[str], max_workers: int | None) -> np.ndarray:
+        res = []
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            res = np.array(tqdm(executor.map(self, texts), total=len(texts)))
-        return res
+            for emb in tqdm(
+                executor.map(self, texts), 
+                total=len(texts), 
+                colour="blue",
+            ):
+                res.append(emb)
+        return np.array(res)
     
-    def process_batch_cpu(self, texts: List[str], max_workers: int) -> np.ndarray:
+    def process_batch_cpu(self, texts: List[str], max_workers: int | None) -> np.ndarray:
+        res = []
         with ProcessPoolExecutor(max_workers=max_workers) as executor:
-            res = np.array(tqdm(executor.map(self, texts), total=len(texts)))
+            for emb in tqdm(
+                executor.map(self, texts), 
+                total=len(texts), 
+                colour="magenta",
+            ):
+                res.append(emb)
         return res

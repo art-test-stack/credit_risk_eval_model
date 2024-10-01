@@ -1,17 +1,18 @@
 from src.data.features import select_features, DataType, features
-from src.data.corenlp import CoreNLP
-from src.data.glove import GloVe
+from src.data.stanfordnlp import StanfordNLP
 
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
 
 import math
 
 import torch
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Union, Tuple, Callable
 
 
 features_post_preprocessing = [
@@ -65,8 +66,7 @@ def preprocess_hard_features(df: pd.DataFrame) -> pd.DataFrame:
  
 def preprocess_textual_feature(
         df: pd.DataFrame, 
-        seg_model: CoreNLP = CoreNLP(), 
-        emb_model: GloVe = GloVe()
+        nlp_model: Callable = StanfordNLP(),
     ) -> torch.Tensor:
 
     # desc = df["desc"].values
@@ -76,8 +76,9 @@ def preprocess_textual_feature(
     # segmented_text = seg_model(desc)
     # embeddings = emb_model(segmented_text, to_tensor=True) # B, S, D
     # pad all loan textual descriptions to include 200 terms for loan descriptions from LendingClub
-    embeddings = df["desc"].apply(lambda x: emb_model(seg_model(x))).values
-    return embeddings
+    embeddings = nlp_model.process_batch(df["desc"].values)
+    df.drop(columns="desc", inplace=True)
+    return torch.Tensor(embeddings)
 
 
 def split_data(df: pd.DataFrame, get_dev_set: bool = True) -> pd.DataFrame:
@@ -116,18 +117,27 @@ def normalize(
 
 
 def balance_training_data(
-        X_train: pd.DataFrame, 
-        train_desc: torch.Tensor, 
-        y_train: pd.DataFrame
+        X: pd.DataFrame,
+        y: pd.DataFrame
     ) -> Tuple[pd.DataFrame,torch.Tensor, pd.DataFrame]:
-    # TODO
-    return X_train, train_desc, y_train
+    df = X.copy()
+    # X = X.drop(columns="desc")
+    ros = RandomOverSampler(sampling_strategy=0.5, random_state=42)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
+
+    rus = RandomUnderSampler(sampling_strategy=1.0, random_state=42)
+    X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
+
+    # resampled_df = pd.DataFrame(X_resampled, columns=X.columns)
+    # resampled_df["loan_status"] = y_resampled
+    # resampled_df["desc"] = df.loc[X_resampled.index, "desc"].values
+
+    return X_resampled, y_resampled 
 
 
 def preprocess_data(
         file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
-        seg_model: CoreNLP = CoreNLP(), 
-        emb_model: GloVe = GloVe(),
+        nlp_model: Callable = StanfordNLP(), 
         concat_train_dev_sets: bool = False,
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
@@ -138,18 +148,27 @@ def preprocess_data(
 
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
+    X_train, y_train = balance_training_data(X_train, y_train)
 
+    train_desc = preprocess_textual_feature(X_train, nlp_model)
+    dev_desc = preprocess_textual_feature(X_dev, nlp_model)
+    test_desc = preprocess_textual_feature(X_train, nlp_model)
 
-    train_desc = preprocess_textual_feature(X_train)
-    dev_desc = preprocess_textual_feature(X_dev)
-    test_desc = preprocess_textual_feature(X_train)
+    X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
-    X_train, X_test, X_dev = normalize(X_train, X_test, X_dev)
+    X_train = torch.Tensor(X_train.values)
+    X_dev = torch.Tensor(X_dev.values)
+    X_test = torch.Tensor(X_test.values)
+    
+    y_train = torch.Tensor(y_train.values)
+    y_dev = torch.Tensor(y_dev.values)
+    y_test = torch.Tensor(y_test.values)
 
-    X_train, train_desc, y_train = balance_training_data(X_train, train_desc, y_train)
-
-    # CONCAT train & dev SERS
-    # TO TENSOR
+    if concat_train_dev_sets:
+        X_train = torch.cat((X_train, X_dev), dim=0)
+        y_train = torch.cat((y_train, y_dev), dim=0)
+        train_desc = torch.cat((train_desc, dev_desc), dim=0)
+        
 
     return (X_train, train_desc, y_train), (X_test, test_desc, y_test), (X_dev, dev_desc, y_dev)
 

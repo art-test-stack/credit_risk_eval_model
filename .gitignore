@@ -2,6 +2,10 @@
 notes.md
 /data/*
 !/data/README.md
+
+/model/*
+!/model/README.md
+
 .vscode/
 notebooks/
 archives/
