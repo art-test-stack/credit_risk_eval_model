@@ -1,0 +1,78 @@
+import stanza
+import spacy
+import numpy as np
+import torch
+import pandas as pd
+
+from typing import Tuple, List
+from pathlib import Path
+
+from nltk.corpus import stopwords
+from tqdm import tqdm
+
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+
+
+class StanfordNLP:
+    def __init__(self) -> None:
+        stanza.download('en')  # Download the English models
+        self.stop_words = set(stopwords.words('english'))
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.corenlp = stanza.Pipeline(
+            'en', 
+            processors='tokenize,pos,lemma,depparse,ner',
+            use_gpu=torch.cuda.is_available(),
+            device=self.device,
+        )
+        self.glove = spacy.load('en_core_web_lg')  # or 'en_vectors_web_lg' for larger GloVe vectors
+
+    def tokenize(self, text: str) -> List[str]:
+        doc = self.corenlp(text)
+        tokens = [word.lemma for sentence in doc.sentences for word in sentence.words if word.lemma not in self.stop_words]
+        return tokens
+    
+    def pad_embeddings(self, embeddings: np.ndarray, max_length: int = 200) -> np.ndarray:
+        if len(embeddings) > max_length:
+            return embeddings[:max_length]
+        else:
+            padding = np.zeros((max_length - len(embeddings), embeddings.shape[1]))
+            return np.vstack((embeddings, padding))
+
+    def embbed_tokens(self, tokens: List[str]) -> np.ndarray:
+        emb = np.array([ self.glove.vocab.get_vector(tok) for tok in tokens ])
+        emb = self.pad_embeddings(emb, 200)
+        return emb
+    
+    def __call__(self, text: str) -> Tuple[List[str], np.ndarray]:
+        tokens = self.tokenize(text)
+        emb = self.embbed_tokens(tokens)
+        return emb
+    
+    def process_batch(
+            self, 
+            texts: List[str] | pd.Series | pd.DataFrame, 
+            max_workers: int = 4, 
+            parralize: bool = True
+        ) -> np.ndarray:
+        if isinstance(texts, pd.Series):
+            texts = texts.values
+        elif isinstance(texts, pd.DataFrame):
+            texts = texts["desc"].values
+
+        if self.device == "cuda":
+            res = self.process_batch_cuda(texts, max_workers)
+        elif self.device == "cpu" and parralize:
+            res = self.process_batch_cpu(texts, max_workers)
+        else:
+            res = np.array([ self(text) for text in tqdm(texts)])
+        return res
+    
+    def process_batch_cuda(self, texts: List[str], max_workers: int) -> np.ndarray:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            res = np.array(tqdm(executor.map(self, texts), total=len(texts)))
+        return res
+    
+    def process_batch_cpu(self, texts: List[str], max_workers: int) -> np.ndarray:
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            res = np.array(tqdm(executor.map(self, texts), total=len(texts)))
+        return res
