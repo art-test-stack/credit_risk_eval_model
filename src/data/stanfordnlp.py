@@ -7,6 +7,7 @@ import pandas as pd
 from typing import Tuple, List
 from pathlib import Path
 
+import nltk
 from nltk.corpus import stopwords
 from tqdm import tqdm
 
@@ -15,6 +16,8 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 class StanfordNLP:
     def __init__(self) -> None:
+        
+        nltk.download('stopwords')
         stanza.download('en')  # Download the English models
         self.stop_words = set(stopwords.words('english'))
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
