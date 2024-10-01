@@ -1,5 +1,3 @@
-from src.data.corenlp import CoreNLP
-from src.data.glove import GloVe
 from src.model.te import TransformerEncoder
 
 import torch
@@ -23,8 +21,6 @@ class CREModel(nn.Module):
             te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = F.relu,
         ) -> None:
         super().__init__()
-        self.corenlp = CoreNLP()
-        self.glove = GloVe()
         self.te = TransformerEncoder(
             d_model=d_model,
             n_head=nhead,
