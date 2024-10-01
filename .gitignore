@@ -1,6 +1,7 @@
 # Repository files
 notes.md
 /data/*
+!/data/preprocessed/README.md
 !/data/README.md
 
 /model/*
