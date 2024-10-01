@@ -7,6 +7,9 @@ notes.md
 /model/*
 !/model/README.md
 
+
+/jobs/*
+
 .vscode/
 notebooks/
 archives/
