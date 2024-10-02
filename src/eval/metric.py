@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from torcheval.metrics import AUC
+from torcheval.metrics import AUC, BinaryAUROC
 from torcheval.metrics.functional import multiclass_recall, multiclass_precision
 
 class GMean(nn.Module):
@@ -20,3 +20,13 @@ class AUC(AUC):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+
+class ROCAUC(BinaryAUROC):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+    
+    def __call__(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        self.update(input, target)
+        res = self.compute()
+        return res
+    
