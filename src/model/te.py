@@ -30,4 +30,4 @@ class TransformerEncoder(nn.Module):
         )
     
     def forward(self, x):
-        return self.main(x)
+        return self.main(x)[:,-1,:].view(x.size(0), -1)
