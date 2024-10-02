@@ -142,18 +142,25 @@ def preprocess_data(
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
+    print("Select features...")
     df = select_features(df)
 
+    print("Preprocess hard-features...")
     df = preprocess_hard_features(df)
 
+    print("Split dataset...")
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
+    print("Balance training set...")
     X_train, y_train = balance_training_data(X_train, y_train)
+    
 
+    print("Preprocess training textual features...")
     train_desc = preprocess_textual_feature(X_train, nlp_model)
     dev_desc = preprocess_textual_feature(X_dev, nlp_model)
     test_desc = preprocess_textual_feature(X_train, nlp_model)
 
+    print("Normalize...")
     X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
     X_train = torch.Tensor(X_train.values)

@@ -63,10 +63,13 @@ class StanfordNLP:
             texts = texts["desc"].values
 
         if self.device == "cuda":
+            print("Tokenize loan descriptions on cuda...")
             res = self.process_batch_cuda(texts, max_workers)
         elif self.device == "cpu" and parralize:
+            print("Tokenize loan descriptions on cpu using ProcessPoolExecutor...")
             res = self.process_batch_cpu(texts, max_workers)
         else:
+            print("Tokenize loan descriptions on cpu one by one...")
             res = np.array([ self(text) for text in tqdm(texts)])
         return res
     
