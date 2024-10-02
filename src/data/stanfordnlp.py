@@ -62,7 +62,7 @@ class StanfordNLP:
         elif isinstance(texts, pd.DataFrame):
             texts = texts["desc"].values
 
-        if self.device == "cuda":
+        if self.device == "cuda" and parralize:
             print("Tokenize loan descriptions on cuda...")
             res = self.process_batch_cuda(texts, max_workers)
         elif self.device == "cpu" and parralize:
