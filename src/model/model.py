@@ -12,7 +12,7 @@ class CREModel(nn.Module):
     """
     def __init__(
             self, 
-            d_model: int = 300,
+            d_model: int = 200,
             nhead: int = 8,
             dim_ffn: int = 50,
             num_layers: int = 1,

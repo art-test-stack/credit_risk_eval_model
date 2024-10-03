@@ -15,7 +15,11 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 
 class StanfordNLP:
-    def __init__(self) -> None:
+    def __init__(
+            self, 
+            glove_file_path: str = "model/glove.6B/glove.6B.200d.txt", 
+            emb_dim: int = 200
+        ) -> None:
         
         nltk.download('stopwords')
         stanza.download('en')  # Download the English models
@@ -27,7 +31,20 @@ class StanfordNLP:
             use_gpu=torch.cuda.is_available(),
             device=self.device,
         )
-        self.glove = spacy.load('en_core_web_lg')  # or 'en_vectors_web_lg' for larger GloVe vectors
+        # self.glove = spacy.load('en_core_web_lg')  # or 'en_vectors_web_lg' for larger GloVe vectors
+
+        self.glove = self.load_spacy_glove(glove_file_path)
+        self.embedding_dim = emb_dim
+
+    def load_spacy_glove(self, glove_file_path: str) -> spacy.language.Language:
+        nlp = spacy.blank("en")
+        with open(glove_file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                values = line.split()
+                word = values[0]
+                vector = np.asarray(values[1:], dtype='float32')
+                nlp.vocab.set_vector(word, vector)
+        return nlp
 
     def tokenize(self, text: str) -> List[str]:
         doc = self.corenlp(text)
