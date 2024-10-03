@@ -13,7 +13,7 @@ class TransformerEncoder(nn.Module):
             dim_ffn: int, 
             num_layers: int,
             dropout: float,
-            activation: Union[str, Callable[[torch.Tensor], torch.Tensor]] = F.relu,
+            activation: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
         ) -> None:
         super().__init__()
 
@@ -30,4 +30,4 @@ class TransformerEncoder(nn.Module):
         )
     
     def forward(self, x):
-        return self.main(x)[:,-1,:].view(x.size(0), -1)
+        return torch.mean(self.main(x), dim=1)

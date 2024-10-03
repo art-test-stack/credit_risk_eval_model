@@ -2,7 +2,6 @@ from src.model.te import TransformerEncoder
 
 import torch
 from torch import nn
-import torch.functional as F
 
 from typing import Callable, Union
 
@@ -19,7 +18,7 @@ class CREModel(nn.Module):
             num_layers: int = 1,
             dropout: float = .0,
             dim_ft: int = 47,
-            te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = F.relu,
+            te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
         ) -> None:
         super().__init__()
         self.te = TransformerEncoder(
@@ -30,7 +29,7 @@ class CREModel(nn.Module):
             dropout=dropout,
             activation=te_act,
         )
-        self.dff = nn.Linear(dim_ffn + dim_ft, 2)
+        self.dff = nn.Linear(dim_ffn + dim_ft, 1)
         self.sig = nn.Sigmoid()
 
     def forward(self, X: torch.Tensor, desc: torch.Tensor) -> torch.Tensor:

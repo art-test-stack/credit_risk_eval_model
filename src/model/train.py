@@ -18,7 +18,7 @@ def fit(
         y_test: torch.Tensor | None = None,
         epochs: int = 10,
         batch_size: int = 32,
-        lr: float = 1e-3,
+        lr: float = 1e-4,
         weight_decay: float = 1e-4,
         device: str | torch.device = "cpu",
         verbose: bool = True
