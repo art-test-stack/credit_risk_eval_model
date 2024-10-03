@@ -30,4 +30,4 @@ class TransformerEncoder(nn.Module):
         )
     
     def forward(self, x):
-        return torch.mean(self.main(x), dim=1)
+        return self.main(x)[:,0,:].reshape(x.size[0], -1)

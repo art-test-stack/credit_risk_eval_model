@@ -23,7 +23,7 @@ class CREModel(nn.Module):
         super().__init__()
         self.te = TransformerEncoder(
             d_model=d_model,
-            n_head=nhead,
+            nhead=nhead,
             dim_ffn=dim_ffn,
             num_layers=num_layers,
             dropout=dropout,

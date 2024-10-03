@@ -6,7 +6,7 @@ from torcheval.metrics.functional import multiclass_recall, multiclass_precision
 
 class GMean(nn.Module):
     def __init__(self):
-        super.__init__()
+        super().__init__()
 
     def forward(self, target, pred):
         sensitivity = multiclass_recall(pred, target)       # TP / TP + FN
