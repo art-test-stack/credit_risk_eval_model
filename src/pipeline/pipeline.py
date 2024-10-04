@@ -43,6 +43,22 @@ def pipeline(
         torch.save(test_desc, Path("data/preprocessed/").joinpath("test_desc.pt"))
         torch.save(y_test, Path("data/preprocessed/").joinpath("y_test.pt"))
 
+    if not do_preprocessing:
+        X_train = torch.load(Path("data/preprocessed/").joinpath("X_train.pt"))
+        train_desc = torch.load(Path("data/preprocessed/").joinpath("train_desc.pt"))
+        y_train = torch.load(Path("data/preprocessed/").joinpath("y_train.pt"))
+
+        X_test = torch.load(Path("data/preprocessed/").joinpath("X_test.pt"))
+        test_desc = torch.load(Path("data/preprocessed/").joinpath("test_desc.pt"))
+        y_test = torch.load(Path("data/preprocessed/").joinpath("y_test.pt"))
+
+        X_train.to(device)
+        train_desc.to(device)
+        y_train.to(device)
+
+        X_test.to(device)
+        test_desc.to(device)
+        y_test.to(device)
     
     # MODEL TRAINING
     model, history = fit(
