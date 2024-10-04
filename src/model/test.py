@@ -48,6 +48,6 @@ def evaluate_model(
             # X, y = X.to(device), y.to(device)
             # y_pred = model(X)
             # metric += eval_metric(y, y_pred) * len(X)
-            metric += _eval_by_batch(model, X, desc, y, eval_metric, device)
+            metric += _eval_by_batch(model, X, desc[idx], y, eval_metric, device)
     metric /= len(data_loader.dataset)
     return metric
