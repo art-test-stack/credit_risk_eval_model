@@ -1,3 +1,4 @@
+from utils import get_device
 import torch
 from torch import nn
 import torch.functional as F
@@ -33,10 +34,11 @@ class TransformerEncoder(nn.Module):
             num_layers: int,
             dropout: float,
             activation: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
+            device: torch.device | str = get_device()
         ) -> None:
         super().__init__()
 
-        self.pos_enc = PositionalEncoding(d_model=d_model, dropout=dropout)
+        self.pos_enc = PositionalEncoding(d_model=d_model, dropout=dropout).to(device)
         enc_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
             nhead=nhead,
@@ -51,4 +53,4 @@ class TransformerEncoder(nn.Module):
     
     def forward(self, x):
         x_pe = self.pos_enc(x)
-        return self.main(x)[:,0,:].reshape(x.size[0], -1)
+        return self.main(x_pe)[:,0,:].reshape(x.size[0], -1)

@@ -1,4 +1,5 @@
 from src.eval.metric import AUC, GMean
+from utils import get_device
 # from src.model.test import _eval_by_batch
 
 import torch
@@ -20,7 +21,7 @@ def fit(
         batch_size: int = 32,
         lr: float = 1e-4,
         weight_decay: float = 1e-4,
-        device: str | torch.device = "cpu",
+        device: str | torch.device = get_device(),
         verbose: bool = True
     ) -> Tuple[nn.Module, dict]:
     model = model.to(device)

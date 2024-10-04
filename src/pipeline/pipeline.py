@@ -60,6 +60,7 @@ def pipeline(
         test_desc.to(device)
         y_test.to(device)
     
+    model.to(device)
     # MODEL TRAINING
     model, history = fit(
         model, 
