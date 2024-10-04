@@ -108,8 +108,8 @@ def normalize(
 
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
-    if X_dev:
-        X_dev = scaler.transform(X_dev)
+    # if X_dev:
+    X_dev = scaler.transform(X_dev)
 
     if return_scaler:
         X_train, X_test, X_dev, scaler
@@ -158,14 +158,14 @@ def preprocess_data(
     print("Preprocess training textual features...")
     train_desc = preprocess_textual_feature(X_train, nlp_model)
     dev_desc = preprocess_textual_feature(X_dev, nlp_model)
-    test_desc = preprocess_textual_feature(X_train, nlp_model)
+    test_desc = preprocess_textual_feature(X_test, nlp_model)
 
     print("Normalize...")
     X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
-    X_train = torch.Tensor(X_train.values)
-    X_dev = torch.Tensor(X_dev.values)
-    X_test = torch.Tensor(X_test.values)
+    X_train = torch.Tensor(X_train)
+    X_dev = torch.Tensor(X_dev)
+    X_test = torch.Tensor(X_test)
     
     y_train = torch.Tensor(y_train.values)
     y_dev = torch.Tensor(y_dev.values)
