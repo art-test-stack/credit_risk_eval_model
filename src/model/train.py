@@ -44,8 +44,8 @@ def fit(
             tepoch.set_description(f"Epoch {epoch}")
             model.train()
             train_loss = 0
-            for idx, X_batch, y_batch in enumerate(train_loader):
-                X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            for idx, (X_batch, y_batch) in enumerate(train_loader):
+                # X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                 optimizer.zero_grad()
                 y_pred = model(X_batch, desc_train[idx])
                 loss = criterion(y_pred, y_batch)
@@ -60,7 +60,7 @@ def fit(
                 auc_v = 0
                 gmean_v = 0
                 with torch.no_grad():
-                    for idx, X_batch, y_batch in enumerate(dev_loader):
+                    for idx, (X_batch, y_batch) in enumerate(dev_loader):
                         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                         y_pred = model(X_batch, desc_test[idx])
                         loss = criterion(y_pred, y_batch)

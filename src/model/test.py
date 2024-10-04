@@ -43,7 +43,7 @@ def evaluate_model(
 
     metric = 0
 
-    for idx, X, y in enumerate(data_loader):
+    for idx, (X, y) in enumerate(data_loader):
         with torch.no_grad():
             # X, y = X.to(device), y.to(device)
             # y_pred = model(X)
