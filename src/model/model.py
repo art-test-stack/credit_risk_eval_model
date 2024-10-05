@@ -29,8 +29,9 @@ class CREModel(nn.Module):
             dropout=dropout,
             activation=te_act,
         )
-        self.dff = nn.Linear(d_model + dim_ft - 1, 1)
+        self.dff = nn.Linear(d_model + dim_ft - 1, 2)
         self.sig = nn.Sigmoid()
+        # self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, X: torch.Tensor, desc: torch.Tensor) -> torch.Tensor:
         # desc_text, hard_features = loans
@@ -42,5 +43,4 @@ class CREModel(nn.Module):
 
         x_dff = torch.concat((res_te, X), dim=1)
         dff_out = self.dff(x_dff)
-
         return self.sig(dff_out)

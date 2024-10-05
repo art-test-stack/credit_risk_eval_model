@@ -67,8 +67,8 @@ def fit(
                         y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
                         test_loss += loss.item()
-                        auc_v = auc(y_batch.reshape(-1), y_pred.reshape(-1)) * len(X_batch)
-                        gmean_v = gmean(y_batch.reshape(-1), y_pred.reshape(-1)) * len(X_batch)
+                        auc_v = auc(y_batch.reshape(-1), torch.round(y_pred.reshape(-1))) * len(X_batch)
+                        gmean_v = gmean(y_batch.reshape(-1), torch.round(y_pred.reshape(-1))) * len(X_batch)
 
                 auc_v /= len(dev_loader.dataset)
                 gmean_v /= len(dev_loader.dataset)
@@ -81,5 +81,7 @@ def fit(
                 gmean = 100. * gmean_v.cpu().numpy(),
             )
             tepoch.update(1)
-
+            
+    print("gmean.specificities: ", gmean.specificities)
+    print("gmean.sensitivities: ", gmean.sensitivities)
     return model, history

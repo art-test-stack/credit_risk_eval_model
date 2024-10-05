@@ -5,7 +5,7 @@ from src.model.model import CREModel
 from src.model.train import fit
 from src.model.test import evaluate_model
 
-from src.eval.metric import GMean, AUC
+from src.eval.metric import GMean, ROCAUC
 from src.eval.visualize import plot_losses
 from utils import get_device
 
@@ -20,6 +20,7 @@ def pipeline(
         model: CREModel = CREModel(),
         nlp_model: Callable = StanfordNLP(),
         do_preprocessing: bool = True,
+        epochs: int = 100,
         device: str | torch.device = get_device()
     ) -> Any:
     
@@ -78,7 +79,7 @@ def pipeline(
         X_test,
         test_desc, 
         y_test, 
-        epochs=100, 
+        epochs=epochs, 
         batch_size=1024, 
         lr=1e-4, 
         weight_decay=1e-4, 
@@ -97,7 +98,7 @@ def pipeline(
         X_test, 
         test_desc,
         y_test, 
-        eval_metric=AUC(), 
+        eval_metric=ROCAUC(), 
         device=device
     )
     gmean = evaluate_model(
