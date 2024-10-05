@@ -16,9 +16,9 @@ class GMean(nn.Module):
         return g_mean
 
 
-class AUC(AUC):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+# class AUC(AUC):
+#     def __init__(self, *args, **kwargs) -> None:
+#         super().__init__(*args, **kwargs)
 
 
 class ROCAUC(BinaryAUROC):

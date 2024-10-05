@@ -1,7 +1,11 @@
 from src.pipeline.pipeline import pipeline
-
+from utils import get_device
 
 if __name__ == "__main__":
-    pipeline(do_preprocessing=False)
+    pipeline(
+        device=get_device(),
+        do_preprocessing=False
+    )
+    
 
     

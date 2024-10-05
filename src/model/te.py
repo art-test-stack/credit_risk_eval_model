@@ -22,7 +22,8 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)
+        # return self.dropout(x)
+        return x
     
 
 class TransformerEncoder(nn.Module):
@@ -33,12 +34,11 @@ class TransformerEncoder(nn.Module):
             dim_ffn: int, 
             num_layers: int,
             dropout: float,
-            activation: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
-            device: torch.device | str = get_device()
+            activation: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU()
         ) -> None:
         super().__init__()
 
-        self.pos_enc = PositionalEncoding(d_model=d_model, dropout=dropout).to(device)
+        self.pos_enc = PositionalEncoding(d_model=d_model, dropout=dropout)
         enc_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
             nhead=nhead,
@@ -52,5 +52,5 @@ class TransformerEncoder(nn.Module):
         )
     
     def forward(self, x):
-        x_pe = self.pos_enc(x)
-        return self.main(x_pe)[:,0,:].reshape(x.size[0], -1)
+        # x_pe = self.pos_enc(x)
+        return self.main(x)[:,0,:].reshape(x.size(0), -1)

@@ -20,7 +20,7 @@ def _eval_by_batch(
     with torch.no_grad():
         X, desc, y = X.to(device), desc.to(device), y.to(device)
         y_pred = model(X, desc)
-        metric = eval_metric(y, y_pred) * len(X)
+        metric = eval_metric(y.reshape(-1), y_pred.reshape(-1)) * len(X)
     return metric
 
 def evaluate_model(
@@ -35,7 +35,7 @@ def evaluate_model(
     model = model.to(device)
 
     data_loader = DataLoader(
-        TensorDataset(X_test, y_test), 
+        TensorDataset(X_test, desc, y_test), 
         batch_size=batch_size, 
         shuffle=False
     )
@@ -43,11 +43,11 @@ def evaluate_model(
 
     metric = 0
 
-    for idx, (X, y) in enumerate(data_loader):
+    for X, desc, y in data_loader:
         with torch.no_grad():
             # X, y = X.to(device), y.to(device)
             # y_pred = model(X)
             # metric += eval_metric(y, y_pred) * len(X)
-            metric += _eval_by_batch(model, X, desc[idx], y, eval_metric, device)
+            metric += _eval_by_batch(model, X, desc, y, eval_metric, device)
     metric /= len(data_loader.dataset)
     return metric

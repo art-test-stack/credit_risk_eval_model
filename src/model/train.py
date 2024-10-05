@@ -1,4 +1,4 @@
-from src.eval.metric import AUC, GMean
+from src.eval.metric import ROCAUC, GMean
 from utils import get_device
 # from src.model.test import _eval_by_batch
 
@@ -32,28 +32,29 @@ def fit(
     )
     criterion = nn.BCELoss()
     # criterion = nn.BCEWithLogitsLoss()
-    auc = AUC()
+    auc = ROCAUC()
     gmean = GMean()
-    train_loader = DataLoader(TensorDataset(X_train, y_train), batch_size=batch_size, shuffle=True)
-    dev_loader = DataLoader(TensorDataset(X_test, y_test), batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(TensorDataset(X_train, desc_train, y_train), batch_size=batch_size, shuffle=True)
+    dev_loader = DataLoader(TensorDataset(X_test, desc_test, y_test), batch_size=batch_size, shuffle=False)
 
     history = {"train_loss": [], "test_loss": []}
 
-    for epoch in tqdm(range(epochs)):
 
-        with tqdm(train_loader, unit="batch", disable=not verbose) as tepoch:
-            tepoch.set_description(f"Epoch {epoch}")
+    with tqdm(range(epochs), unit="batch", disable=not verbose) as tepoch:
+        
+        for epoch in tqdm(range(epochs)):
+            # tepoch.set_description(f"Epoch {epoch}")
             model.train()
             train_loss = 0
-            for idx, (X_batch, y_batch) in enumerate(train_loader):
+            for X_batch, desc_batch, y_batch in train_loader:
                 # X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                 optimizer.zero_grad()
-                y_pred = model(X_batch, desc_train[idx])
+                y_pred = model(X_batch, desc_batch)
                 loss = criterion(y_pred, y_batch)
                 loss.backward()
                 optimizer.step()
                 train_loss += loss.item()
-            history["train_loss"].append(train_loss.cpu().numpy() / len(train_loader))
+            history["train_loss"].append(train_loss / len(train_loader))
 
             if X_test is not None and y_test is not None:
                 model.eval()
@@ -61,23 +62,24 @@ def fit(
                 auc_v = 0
                 gmean_v = 0
                 with torch.no_grad():
-                    for idx, (X_batch, y_batch) in enumerate(dev_loader):
+                    for X_batch, desc_batch, y_batch in dev_loader:
                         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-                        y_pred = model(X_batch, desc_test[idx])
+                        y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
                         test_loss += loss.item()
-                        auc_v = auc(y_batch, y_pred) * len(X_batch)
-                        gmean_v = gmean(y_batch, y_pred) * len(X_batch)
+                        auc_v = auc(y_batch.reshape(-1), y_pred.reshape(-1)) * len(X_batch)
+                        gmean_v = gmean(y_batch.reshape(-1), y_pred.reshape(-1)) * len(X_batch)
 
                 auc_v /= len(dev_loader.dataset)
                 gmean_v /= len(dev_loader.dataset)
-                history["test_loss"].append(test_loss.cpu().numpy()  / len(dev_loader))
+                history["test_loss"].append(test_loss  / len(dev_loader))
 
             tepoch.set_postfix(
                 loss = history["train_loss"][-1],
                 test_loss = history["test_loss"][-1], 
-                auc = 100. * auc_v,
-                gmean = 100. * gmean_v
+                auc = 100. * auc_v.cpu().numpy(),
+                gmean = 100. * gmean_v.cpu().numpy(),
             )
+            tepoch.update(1)
 
     return model, history

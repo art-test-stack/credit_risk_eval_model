@@ -52,13 +52,21 @@ def pipeline(
         test_desc = torch.load(Path("data/preprocessed/").joinpath("test_desc.pt"))
         y_test = torch.load(Path("data/preprocessed/").joinpath("y_test.pt"))
 
-        X_train.to(device)
-        train_desc.to(device)
-        y_train.to(device)
+    X_train = X_train.to(device)
+    train_desc = train_desc.to(device)
+    y_train = y_train.to(device)
 
-        X_test.to(device)
-        test_desc.to(device)
-        y_test.to(device)
+    X_test = X_test.to(device)
+    test_desc = test_desc.to(device)
+    y_test = y_test.to(device)
+    
+    print("X_train.device", X_train.device)
+    print("train_desc.device", train_desc.device)
+    print("y_train.device", y_train.device)
+
+    print("X_test.device", X_test.device)
+    print("test_desc.device", test_desc.device)
+    print("y_test.device", y_test.device)
     
     model.to(device)
     # MODEL TRAINING
