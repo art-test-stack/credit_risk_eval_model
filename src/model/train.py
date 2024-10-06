@@ -58,27 +58,25 @@ def fit(
 
             if X_test is not None and y_test is not None:
                 model.eval()
+                auc.reset()
+                gmean.reset()
                 test_loss = 0
-                auc_v = 0
-                gmean_v = 0
                 with torch.no_grad():
                     for X_batch, desc_batch, y_batch in dev_loader:
                         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                         y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
                         test_loss += loss.item() * len(X_batch)
-                        auc_v += auc(y_batch, torch.round(y_pred)) * len(X_batch)
-                        gmean_v += gmean(y_batch, torch.round(y_pred)) * len(X_batch)
+                        auc.update(y_pred, y_batch)
+                        gmean.update(y_pred, y_batch)
 
-                auc_v /= len(dev_loader.dataset)
-                gmean_v /= len(dev_loader.dataset)
                 history["test_loss"].append(test_loss  / len(dev_loader.dataset))
 
             tepoch.set_postfix(
                 loss = history["train_loss"][-1],
                 test_loss = history["test_loss"][-1], 
-                auc = 100. * auc_v.cpu().numpy(),
-                gmean = 100. * gmean_v.cpu().numpy(),
+                auc = 100. * auc.compute().cpu().numpy(),
+                gmean = 100. * gmean.compute().cpu().numpy(),
             )
             tepoch.update(1)
             

@@ -8,21 +8,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from typing import Callable
 
 
-def _eval_by_batch(
-        model: nn.Module,
-        X: torch.Tensor,
-        desc: torch.Tensor,
-        y: torch.Tensor,
-        eval_metric: Callable,
-        device: str | torch.device,
-    ) -> torch.Tensor:
-    
-    with torch.no_grad():
-        X, desc, y = X.to(device), desc.to(device), y.to(device)
-        y_pred = model(X, desc)
-        metric = eval_metric(y, torch.round(y_pred)) * len(X)
-    return metric
-
 def evaluate_model(
         model: nn.Module,
         X_test: torch.Tensor,
@@ -40,14 +25,10 @@ def evaluate_model(
         shuffle=False
     )
     model.eval()
-
-    metric = 0
+    eval_metric.reset()
 
     for X, desc, y in data_loader:
         with torch.no_grad():
-            # X, y = X.to(device), y.to(device)
-            # y_pred = model(X)
-            # metric += eval_metric(y, y_pred) * len(X)
-            metric += _eval_by_batch(model, X, desc, y, eval_metric, device) * len(X)
-    metric /= len(data_loader.dataset)
-    return metric
+            y_pred = model(X, desc)
+            metric = eval_metric.update(y_pred, y)
+    return metric.compute()

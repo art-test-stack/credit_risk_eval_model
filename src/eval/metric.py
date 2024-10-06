@@ -4,21 +4,35 @@ from torch import nn
 from torcheval.metrics import AUC, BinaryAUROC
 from torcheval.metrics.functional import multiclass_recall, multiclass_precision
 
-class GMean(nn.Module):
+class GMean:
     def __init__(self):
         super().__init__()
+        self.reset()
+
+    def reset(self):
         self.sensitivities = []
         self.specificities = []
-
-    def forward(self, target, pred):
-        sensitivity = multiclass_recall(pred, target)       # TP / TP + FN
-        specificity = multiclass_precision(pred, target)    # TP / TP + FP
+        self.targets = []
+        self.inputs = []
+    
+    def update(self, input, target):
+        self.targets.append(target)
+        self.inputs.append(input)
+    
+    def compute(self):      
+        sensitivity = multiclass_recall(self.preds, self.inputs)       # TP / TP + FN
+        specificity = multiclass_precision(self.preds, self.inputs, average='macro', num_classes=2, zero_division='warn')  # TN / TN + FP
+        
         self.sensitivities.append(sensitivity)
         self.specificities.append(specificity)
-        
+
         g_mean = torch.sqrt(sensitivity * specificity)
         return g_mean
 
+    def __call__(self, input, target):
+        self.update(input, target)
+        g_mean = self.compute()
+        return g_mean
 
 # class AUC(AUC):
 #     def __init__(self, *args, **kwargs) -> None:
@@ -30,7 +44,6 @@ class ROCAUC(BinaryAUROC):
         super().__init__(num_tasks=2)
     
     def __call__(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        self.reset()
         self.update(input, target)
         res = self.compute()
         return res
