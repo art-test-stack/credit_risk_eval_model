@@ -10,21 +10,21 @@ class GMean:
         self.reset()
 
     def reset(self):
-        self.sensitivities = []
-        self.specificities = []
+        # self.sensitivities = []
+        # self.specificities = []
         self.targets = []
         self.inputs = []
     
     def update(self, input, target):
-        self.targets.append(target)
-        self.inputs.append(input)
+        self.targets.extend(target)
+        self.inputs.extend(input)
     
     def compute(self):      
-        sensitivity = multiclass_recall(self.preds, self.inputs)       # TP / TP + FN
-        specificity = multiclass_precision(self.preds, self.inputs, average='macro', num_classes=2, zero_division='warn')  # TN / TN + FP
+        sensitivity = multiclass_recall(self.inputs, self.targets)       # TP / TP + FN
+        specificity = multiclass_precision(self.inputs, self.targets, average='macro', num_classes=2, zero_division='warn')  # TN / TN + FP
         
-        self.sensitivities.append(sensitivity)
-        self.specificities.append(specificity)
+        # self.sensitivities.append(sensitivity)
+        # self.specificities.append(specificity)
 
         g_mean = torch.sqrt(sensitivity * specificity)
         return g_mean
@@ -33,10 +33,6 @@ class GMean:
         self.update(input, target)
         g_mean = self.compute()
         return g_mean
-
-# class AUC(AUC):
-#     def __init__(self, *args, **kwargs) -> None:
-#         super().__init__(*args, **kwargs)
 
 
 class ROCAUC(BinaryAUROC):

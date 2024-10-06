@@ -30,5 +30,5 @@ def evaluate_model(
     for X, desc, y in data_loader:
         with torch.no_grad():
             y_pred = model(X, desc)
-            metric = eval_metric.update(y_pred, y)
-    return metric.compute()
+            eval_metric(y_pred, y)
+    return eval_metric.compute()

@@ -67,7 +67,7 @@ def fit(
                         y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
                         test_loss += loss.item() * len(X_batch)
-                        auc.update(y_pred, y_batch)
+                        auc(y_pred, y_batch)
                         gmean.update(y_pred, y_batch)
 
                 history["test_loss"].append(test_loss  / len(dev_loader.dataset))
