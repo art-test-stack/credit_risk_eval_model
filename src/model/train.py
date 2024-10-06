@@ -30,7 +30,7 @@ def fit(
         lr=lr, 
         weight_decay=weight_decay
     )
-    criterion = nn.BCELoss()
+    criterion = nn.CrossEntropyLoss()
     # criterion = nn.BCEWithLogitsLoss()
     auc = ROCAUC()
     gmean = GMean()
@@ -53,8 +53,8 @@ def fit(
                 loss = criterion(y_pred, y_batch)
                 loss.backward()
                 optimizer.step()
-                train_loss += loss.item()
-            history["train_loss"].append(train_loss / len(train_loader))
+                train_loss += loss.item() * len(X_batch)
+            history["train_loss"].append(train_loss / len(train_loader.dataset))
 
             if X_test is not None and y_test is not None:
                 model.eval()
@@ -66,13 +66,13 @@ def fit(
                         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                         y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
-                        test_loss += loss.item()
-                        auc_v = auc(y_batch.reshape(-1), torch.round(y_pred.reshape(-1))) * len(X_batch)
-                        gmean_v = gmean(y_batch.reshape(-1), torch.round(y_pred.reshape(-1))) * len(X_batch)
+                        test_loss += loss.item() * len(X_batch)
+                        auc_v += auc(y_batch, torch.round(y_pred)) * len(X_batch)
+                        gmean_v += gmean(y_batch, torch.round(y_pred)) * len(X_batch)
 
                 auc_v /= len(dev_loader.dataset)
                 gmean_v /= len(dev_loader.dataset)
-                history["test_loss"].append(test_loss  / len(dev_loader))
+                history["test_loss"].append(test_loss  / len(dev_loader.dataset))
 
             tepoch.set_postfix(
                 loss = history["train_loss"][-1],
@@ -82,6 +82,6 @@ def fit(
             )
             tepoch.update(1)
             
-    print("gmean.specificities: ", gmean.specificities)
-    print("gmean.sensitivities: ", gmean.sensitivities)
+    # print("gmean.specificities: ", gmean.specificities)
+    # print("gmean.sensitivities: ", gmean.sensitivities)
     return model, history

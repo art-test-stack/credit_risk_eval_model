@@ -26,8 +26,8 @@ class GMean(nn.Module):
 
 
 class ROCAUC(BinaryAUROC):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self) -> None:
+        super().__init__(num_tasks=2)
     
     def __call__(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
         self.reset()

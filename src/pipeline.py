@@ -1,3 +1,9 @@
+import torch
+from torch.nn import functional as F
+import pandas as pd
+from typing import Any, Callable
+from pathlib import Path
+
 from src.data.preprocess import preprocess_data
 
 from src.data.stanfordnlp import StanfordNLP
@@ -9,10 +15,6 @@ from src.eval.metric import GMean, ROCAUC
 from src.eval.visualize import plot_losses
 from utils import get_device
 
-import torch
-import pandas as pd
-from typing import Any, Callable
-from pathlib import Path
 
 
 def pipeline(
@@ -61,6 +63,10 @@ def pipeline(
     test_desc = test_desc.to(device)
     y_test = y_test.to(device)
     
+    y_train = F.one_hot(y_train.to(torch.int64)).to(torch.float).reshape(-1,2)
+    y_test = F.one_hot(y_test.to(torch.int64)).to(torch.float).reshape(-1,2)
+    print(y_train.shape)
+    print(y_test.shape)
     print("X_train.device", X_train.device)
     print("train_desc.device", train_desc.device)
     print("y_train.device", y_train.device)

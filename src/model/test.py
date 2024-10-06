@@ -20,7 +20,7 @@ def _eval_by_batch(
     with torch.no_grad():
         X, desc, y = X.to(device), desc.to(device), y.to(device)
         y_pred = model(X, desc)
-        metric = eval_metric(y.reshape(-1), torch.round(y_pred.reshape(-1))) * len(X)
+        metric = eval_metric(y, torch.round(y_pred)) * len(X)
     return metric
 
 def evaluate_model(
