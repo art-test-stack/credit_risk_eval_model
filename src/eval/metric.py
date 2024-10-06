@@ -16,12 +16,14 @@ class GMean:
         self.inputs = []
     
     def update(self, input: torch.Tensor, target: torch.Tensor):
-        self.targets = target if not self.targets else torch.cat([self.targets, target])
-        self.inputs = input if not self.inputs else torch.cat([self.inputs, input])
+        inp = torch.argmax(input, dim=1)
+        tgt = torch.argmax(target, dim=1)
+        self.inputs = inp if isinstance(self.inputs, list) else torch.cat([self.inputs, inp])
+        self.targets = tgt if isinstance(self.targets, list) else torch.cat([self.targets, tgt])
 
     def compute(self):      
         sensitivity = multiclass_recall(self.inputs, self.targets)       # TP / TP + FN
-        specificity = multiclass_precision(self.inputs, self.targets, average='macro', num_classes=2, zero_division='warn')  # TN / TN + FP
+        specificity = multiclass_precision(self.inputs, self.targets, average='macro', num_classes=2)  # TN / TN + FP
         
         # self.sensitivities.append(sensitivity)
         # self.specificities.append(specificity)
@@ -39,7 +41,7 @@ class ROCAUC(BinaryAUROC):
     def __init__(self) -> None:
         super().__init__()
     
-    def __call__(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def __call__(self, input: torch.Tensor, target: torch.Tensor) -> None:
         inp = torch.argmax(input, dim=1)
         tgt = torch.argmax(target, dim=1)
         self.update(inp, tgt)
