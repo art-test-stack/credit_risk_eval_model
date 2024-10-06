@@ -15,10 +15,10 @@ class GMean:
         self.targets = []
         self.inputs = []
     
-    def update(self, input, target):
-        self.targets.extend(target)
-        self.inputs.extend(input)
-    
+    def update(self, input: torch.Tensor, target: torch.Tensor):
+        self.targets = target if not self.targets else torch.cat([self.targets, target])
+        self.inputs = input if not self.inputs else torch.cat([self.inputs, input])
+
     def compute(self):      
         sensitivity = multiclass_recall(self.inputs, self.targets)       # TP / TP + FN
         specificity = multiclass_precision(self.inputs, self.targets, average='macro', num_classes=2, zero_division='warn')  # TN / TN + FP
