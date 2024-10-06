@@ -41,10 +41,10 @@ class GMean:
 
 class ROCAUC(BinaryAUROC):
     def __init__(self) -> None:
-        super().__init__(num_tasks=2)
+        super().__init__()
     
     def __call__(self, input: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
-        self.update(input, target)
-        res = self.compute()
-        return res
+        inp = torch.argmax(input, dim=1)
+        tgt = torch.argmax(target, dim=1)
+        self.update(inp, tgt)
     
