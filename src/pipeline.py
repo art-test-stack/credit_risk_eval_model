@@ -116,5 +116,5 @@ def pipeline(
         device=device
     )
 
-    print(f"AUC: {auc:.4f}, GM: {gmean:.4f}")
+    print(f"AUC: {100 * auc:.2f}, GM: {100 * gmean:.2f}")
 

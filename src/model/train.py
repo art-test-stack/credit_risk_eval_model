@@ -68,7 +68,7 @@ def fit(
                         loss = criterion(y_pred, y_batch)
                         test_loss += loss.item() * len(X_batch)
                         auc(y_pred, y_batch)
-                        gmean.update(y_pred, y_batch)
+                        gmean(y_pred, y_batch)
 
                 history["test_loss"].append(test_loss  / len(dev_loader.dataset))
 
@@ -80,6 +80,4 @@ def fit(
             )
             tepoch.update(1)
             
-    # print("gmean.specificities: ", gmean.specificities)
-    # print("gmean.sensitivities: ", gmean.sensitivities)
     return model, history

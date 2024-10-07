@@ -5,7 +5,7 @@ if __name__ == "__main__":
     pipeline(
         device=get_device(),
         do_preprocessing=False,
-        epochs=400
+        epochs=1000
     )
     
 
