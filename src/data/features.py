@@ -104,6 +104,7 @@ desc_features = {
 }
 
 features = target_variable | loan_charac_features | credit_worthiness_features | solvency_features | desc_features
+features_numerical = [ ft for ft, dtype in features.items() if dtype == DataType.NUMERICAL or dtype == DataType.NUMERICAL_LOG ]
 
 def select_features(df: pd.DataFrame, one_hot_output: bool = True) -> pd.DataFrame:
     raw = df.copy()

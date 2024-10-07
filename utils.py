@@ -2,7 +2,8 @@ import torch
 from pathlib import Path
 
 
-PREPROCESSED_FILE = Path("data/preprocessed_no_sw/") # Path("data/preprocessed/")
+LOANS_FILE = Path("data/accepted_2007_to_2018Q4.csv")
+PREPROCESSED_FILE = Path("data/preprocessed/") # Path("data/preprocessed_no_sw/") 
 
 def get_device():
     if torch.cuda.is_available():

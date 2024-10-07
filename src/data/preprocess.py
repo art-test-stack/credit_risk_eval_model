@@ -1,4 +1,4 @@
-from src.data.features import select_features, DataType, features
+from src.data.features import select_features, DataType, features, features_numerical
 from src.data.stanfordnlp import StanfordNLP
 
 import pandas as pd
@@ -98,10 +98,10 @@ def normalize(
         return_scaler: bool = False
     ) -> None:
 
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    X_train[features_numerical] = scaler.fit_transform(X_train[features_numerical])
+    X_test[features_numerical] = scaler.transform(X_test[features_numerical])
     # if X_dev:
-    X_dev = scaler.transform(X_dev)
+    X_dev[features_numerical] = scaler.transform(X_dev[features_numerical])
 
     if return_scaler:
         X_train, X_test, X_dev, scaler
