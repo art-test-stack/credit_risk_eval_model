@@ -30,15 +30,9 @@ class CREModel(nn.Module):
             activation=te_act,
         )
         self.dff = nn.Linear(d_model + dim_ft - 1, 2)
-        # self.sig = nn.Sigmoid()
         self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, X: torch.Tensor, desc: torch.Tensor) -> torch.Tensor:
-        # desc_text, hard_features = loans
-
-        # seg_text = self.corenlp(desc_text)
-        # emb = self.glove(seg_text, to_tensor=True)
-
         res_te = self.te(desc)
 
         x_dff = torch.concat((res_te, X), dim=1)

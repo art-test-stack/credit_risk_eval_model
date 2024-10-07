@@ -30,7 +30,6 @@ features_post_preprocessing = [
     'home_ownership_RENT', 'verification_status_Not Verified',
     'verification_status_Source Verified', 'verification_status_Verified'
 ]
-# features_post_preprocessing.
 
 def print_stats(df: pd.DataFrame) -> None:
     df = df.copy()
@@ -69,13 +68,6 @@ def preprocess_textual_feature(
         nlp_model: Callable = StanfordNLP(),
     ) -> torch.Tensor:
 
-    # desc = df["desc"].values
-    # df.drop(columns="desc", inplace=True)
-
-    # PREPROCESS HERE
-    # segmented_text = seg_model(desc)
-    # embeddings = emb_model(segmented_text, to_tensor=True) # B, S, D
-    # pad all loan textual descriptions to include 200 terms for loan descriptions from LendingClub
     embeddings = nlp_model.process_batch(df["desc"].values)
     df.drop(columns="desc", inplace=True)
     return torch.Tensor(embeddings)

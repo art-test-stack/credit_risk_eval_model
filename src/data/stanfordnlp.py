@@ -18,7 +18,8 @@ class StanfordNLP:
     def __init__(
             self, 
             glove_file_path: str = "model/glove.6B/glove.6B.200d.txt", 
-            emb_dim: int = 200
+            emb_dim: int = 200,
+            stop_words: bool = False,
         ) -> None:
         
         nltk.download('stopwords')
@@ -31,6 +32,7 @@ class StanfordNLP:
             use_gpu=torch.cuda.is_available(),
             device=self.device,
         )
+        self.use_sw = stop_words
         # self.glove = spacy.load('en_core_web_lg')  # or 'en_vectors_web_lg' for larger GloVe vectors
 
         self.glove = self.load_spacy_glove(glove_file_path)
@@ -48,7 +50,10 @@ class StanfordNLP:
 
     def tokenize(self, text: str) -> List[str]:
         doc = self.corenlp(text)
-        tokens = [word.lemma for sentence in doc.sentences for word in sentence.words if word.lemma not in self.stop_words]
+        if self.use_sw:
+            tokens = [word.lemma for sentence in doc.sentences for word in sentence.words if word.lemma not in self.stop_words]
+        else:
+            tokens = [word.lemma for sentence in doc.sentences for word in sentence.words]
         return tokens
     
     def pad_embeddings(self, embeddings: np.ndarray, max_length: int = 200) -> np.ndarray:

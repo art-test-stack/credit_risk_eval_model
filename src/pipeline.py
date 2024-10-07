@@ -13,7 +13,7 @@ from src.model.test import evaluate_model
 
 from src.eval.metric import GMean, ROCAUC
 from src.eval.visualize import plot_losses
-from utils import get_device
+from utils import get_device, PREPROCESSED_FILE
 
 
 
@@ -23,7 +23,7 @@ def pipeline(
         nlp_model: Callable = StanfordNLP(),
         do_preprocessing: bool = True,
         epochs: int = 100,
-        device: str | torch.device = get_device()
+        device: str | torch.device = get_device(),
     ) -> Any:
     
     print("Start preprocessing data...")
@@ -38,22 +38,22 @@ def pipeline(
         print(X_train.shape, train_desc.shape, y_train.shape)
 
         print("Saving preprocessed data...")
-        torch.save(X_train, Path("data/preprocessed/").joinpath("X_train.pt"))
-        torch.save(train_desc, Path("data/preprocessed/").joinpath("train_desc.pt"))
-        torch.save(y_train, Path("data/preprocessed/").joinpath("y_train.pt"))
+        torch.save(X_train, PREPROCESSED_FILE.joinpath("X_train.pt"))
+        torch.save(train_desc, PREPROCESSED_FILE.joinpath("train_desc.pt"))
+        torch.save(y_train, PREPROCESSED_FILE.joinpath("y_train.pt"))
 
-        torch.save(X_test, Path("data/preprocessed/").joinpath("X_test.pt"))
-        torch.save(test_desc, Path("data/preprocessed/").joinpath("test_desc.pt"))
-        torch.save(y_test, Path("data/preprocessed/").joinpath("y_test.pt"))
+        torch.save(X_test, PREPROCESSED_FILE.joinpath("X_test.pt"))
+        torch.save(test_desc, PREPROCESSED_FILE.joinpath("test_desc.pt"))
+        torch.save(y_test, PREPROCESSED_FILE.joinpath("y_test.pt"))
 
     if not do_preprocessing:
-        X_train = torch.load(Path("data/preprocessed/").joinpath("X_train.pt"))
-        train_desc = torch.load(Path("data/preprocessed/").joinpath("train_desc.pt"))
-        y_train = torch.load(Path("data/preprocessed/").joinpath("y_train.pt"))
+        X_train = torch.load(PREPROCESSED_FILE.joinpath("X_train.pt"))
+        train_desc = torch.load(PREPROCESSED_FILE.joinpath("train_desc.pt"))
+        y_train = torch.load(PREPROCESSED_FILE.joinpath("y_train.pt"))
 
-        X_test = torch.load(Path("data/preprocessed/").joinpath("X_test.pt"))
-        test_desc = torch.load(Path("data/preprocessed/").joinpath("test_desc.pt"))
-        y_test = torch.load(Path("data/preprocessed/").joinpath("y_test.pt"))
+        X_test = torch.load(PREPROCESSED_FILE.joinpath("X_test.pt"))
+        test_desc = torch.load(PREPROCESSED_FILE.joinpath("test_desc.pt"))
+        y_test = torch.load(PREPROCESSED_FILE.joinpath("y_test.pt"))
 
     X_train = X_train.to(device)
     train_desc = train_desc.to(device)

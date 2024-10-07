@@ -1,4 +1,8 @@
 import torch
+from pathlib import Path
+
+
+PREPROCESSED_FILE = Path("data/preprocessed_no_sw/") # Path("data/preprocessed/")
 
 def get_device():
     if torch.cuda.is_available():
@@ -12,3 +16,4 @@ def get_device():
         device = torch.device("cpu")
         print("CUDA and MPS are not available. Using CPU.")
     return device
+
