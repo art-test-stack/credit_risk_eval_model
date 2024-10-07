@@ -41,7 +41,7 @@ class GMean:
         sensitivity = TP / (TP + FN) if (TP + FN) > 0 else 0    # TP / TP + FN
         specificity = TN / (TN + FP) if (TN + FP) > 0 else 0    # TN / TN + FP
 
-        return torch.sqrt(torch.tensor(sensitivity * specificity)).item()
+        return torch.sqrt(torch.tensor(sensitivity * specificity)) #.item()
 
     def __call__(self, input, target):
         self.update(input, target)
