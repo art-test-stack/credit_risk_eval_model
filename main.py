@@ -6,7 +6,7 @@ from pathlib import Path
 
 if __name__ == "__main__":
     use_sw = False
-    do_preprocessing=True
+    do_preprocessing = True
 
     if use_sw:
         preprocessed_file = PREPROCESSED_FILE

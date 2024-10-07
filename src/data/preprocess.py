@@ -155,9 +155,9 @@ def preprocess_data(
     print("Normalize...")
     X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
-    X_train = torch.Tensor(X_train)
-    X_dev = torch.Tensor(X_dev)
-    X_test = torch.Tensor(X_test)
+    X_train = torch.Tensor(X_train.values)
+    X_dev = torch.Tensor(X_dev.values)
+    X_test = torch.Tensor(X_test.values)
     
     y_train = torch.Tensor(y_train.values)
     y_dev = torch.Tensor(y_dev.values)

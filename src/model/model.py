@@ -16,7 +16,7 @@ class CREModel(nn.Module):
             nhead: int = 8,
             dim_ffn: int = 50,
             num_layers: int = 1,
-            dropout: float = .0,
+            dropout: float = .1,
             dim_ft: int = 47,
             te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
         ) -> None:
