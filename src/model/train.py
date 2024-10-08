@@ -19,13 +19,17 @@ class EarlyStopping:
         self.counter = 0
         self.best_loss = None
         self.early_stop = False
+        self.save_model = False
 
     def __call__(self, test_loss):
+        self.save_model = False
         if self.best_loss is None:
             self.best_loss = test_loss
+            self.save_model = True
         elif test_loss < self.best_loss - self.min_delta:
             self.best_loss = test_loss
             self.counter = 0
+            self.save_model = True
         else:
             self.counter += 1
             if self.counter >= self.patience:
@@ -102,13 +106,15 @@ def fit(
             )
 
             early_stopping(history["test_loss"][-1])
+            
+            if early_stopping.save_model:
+                best_model_state = model.state_dict()
+                torch.save(best_model_state, 'model/model.pt')
+
             if early_stopping.early_stop:
                 print(f"Early stopping at epoch {epoch}")
                 break
 
-            if len(history["test_loss"]) == 1 or test_loss < min(history["test_loss"][:-1]):
-                best_model_state = model.state_dict()
-                torch.save(best_model_state, 'model/model.pt')
             
             tepoch.update(1)
 

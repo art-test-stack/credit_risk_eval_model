@@ -1,12 +1,16 @@
 # Repository files
 notes.md
 /data/*
-!/data/preprocessed/README.md
 !/data/README.md
+!/data/preprocessed/
+/data/preprocessed/*
+!/data/preprocessed/README.md
 
 /model/*
 !/model/README.md
-
+!/model/glove.6B/
+/model/glove.6B/*
+!/model/glove.6B/README.md
 
 /jobs/*
 

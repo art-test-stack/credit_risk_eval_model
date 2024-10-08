@@ -18,7 +18,7 @@ if __name__ == "__main__":
     
     pipeline(
         loans_file=LOANS_FILE,
-        model=CREModel(dropout=0.5),
+        model=CREModel(dropout=0.3),
         nlp_model=StanfordNLP(stop_words=use_sw),
         device=get_device(),
         do_preprocessing=do_preprocessing,
