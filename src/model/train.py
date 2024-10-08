@@ -1,5 +1,7 @@
 from src.eval.metric import ROCAUC, GMean
+from src.model.model import CREModel
 from utils import get_device
+
 # from src.model.test import _eval_by_batch
 
 import torch
@@ -8,21 +10,21 @@ from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 
 from tqdm import tqdm
-
+from copy import deepcopy
 
 class EarlyStopping:
-    def __init__(self, patience=5, min_delta=0):
+    def __init__(self, patience=5, min_delta=0.05):
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
         self.best_loss = None
         self.early_stop = False
 
-    def __call__(self, val_loss):
+    def __call__(self, test_loss):
         if self.best_loss is None:
-            self.best_loss = val_loss
-        elif val_loss < self.best_loss - self.min_delta:
-            self.best_loss = val_loss
+            self.best_loss = test_loss
+        elif test_loss < self.best_loss - self.min_delta:
+            self.best_loss = test_loss
             self.counter = 0
         else:
             self.counter += 1
@@ -60,12 +62,11 @@ def fit(
 
     history = {"train_loss": [], "test_loss": []}
 
-    early_stopping = EarlyStopping(patience=5, min_delta=0.01)
+    early_stopping = EarlyStopping(patience=100, min_delta=0.005)
 
     with tqdm(range(epochs), unit="batch", disable=not verbose) as tepoch:
         
-        for epoch in tqdm(range(epochs)):
-            # tepoch.set_description(f"Epoch {epoch}")
+        for epoch in tqdm(range(epochs)):    
             model.train()
             train_loss = 0
             for X_batch, desc_batch, y_batch in train_loader:
@@ -99,17 +100,19 @@ def fit(
                 auc = 100. * auc.compute().cpu().numpy(),
                 gmean = 100. * gmean.compute().cpu().numpy(),
             )
-            tepoch.update(1)
-
 
             early_stopping(history["test_loss"][-1])
             if early_stopping.early_stop:
                 print(f"Early stopping at epoch {epoch}")
                 break
-            
-            if len(history["test_loss"]) == 0 or test_loss < min(history["test_loss"]):
-                best_model_state = model.state_dict()
-                torch.save(best_model_state, 'best_model.pth')
 
-    return best_model_state, history
+            if len(history["test_loss"]) == 1 or test_loss < min(history["test_loss"][:-1]):
+                best_model_state = model.state_dict()
+                torch.save(best_model_state, 'model/model.pt')
+            
+            tepoch.update(1)
+
+    best_model = CREModel()
+    best_model.load_state_dict(torch.load('model/model.pt'))
+    return best_model, history
    

@@ -29,14 +29,20 @@ class CREModel(nn.Module):
             dropout=dropout,
             activation=te_act,
         )
-        self.dff = nn.Linear(d_model + dim_ft - 1, 2)
-        self.dropout = nn.Dropout(dropout)
-        self.softmax = nn.Softmax(dim=-1)
+        self.dff = nn.Sequential(
+            nn.Linear(d_model + dim_ft - 1, 10),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(10, 2),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Softmax(dim=-1)
+        )
+        
 
     def forward(self, x: torch.Tensor, desc: torch.Tensor) -> torch.Tensor:
         te_out = self.te(desc)
 
         x = torch.concat((te_out, x), dim=1)
-        out = self.dff(x)
-        out = self.dropout(out)
-        return self.softmax(out)
+        
+        return self.dff(x)

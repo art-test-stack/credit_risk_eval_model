@@ -89,7 +89,7 @@ def pipeline(
         epochs=epochs, 
         batch_size=1024, 
         lr=1e-4, 
-        weight_decay=1e-4, 
+        weight_decay=1e-5, 
         device=device, 
         verbose=True
     )
