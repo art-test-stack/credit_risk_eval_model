@@ -114,17 +114,12 @@ def balance_training_data(
         X: pd.DataFrame,
         y: pd.DataFrame
     ) -> Tuple[pd.DataFrame,torch.Tensor, pd.DataFrame]:
-    df = X.copy()
-    # X = X.drop(columns="desc")
-    ros = RandomOverSampler(sampling_strategy=0.5, random_state=42)
+
+    ros = RandomOverSampler(sampling_strategy=0.5, random_state=RANDOM_STATE)
     X_resampled, y_resampled = ros.fit_resample(X, y)
 
-    rus = RandomUnderSampler(sampling_strategy=1.0, random_state=42)
+    rus = RandomUnderSampler(sampling_strategy=1.0, random_state=RANDOM_STATE)
     X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
-
-    # resampled_df = pd.DataFrame(X_resampled, columns=X.columns)
-    # resampled_df["loan_status"] = y_resampled
-    # resampled_df["desc"] = df.loc[X_resampled.index, "desc"].values
 
     return X_resampled, y_resampled 
 

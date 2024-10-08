@@ -9,6 +9,27 @@ from typing import Tuple
 
 from tqdm import tqdm
 
+
+class EarlyStopping:
+    def __init__(self, patience=5, min_delta=0):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.best_loss = None
+        self.early_stop = False
+
+    def __call__(self, val_loss):
+        if self.best_loss is None:
+            self.best_loss = val_loss
+        elif val_loss < self.best_loss - self.min_delta:
+            self.best_loss = val_loss
+            self.counter = 0
+        else:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+
+
 def fit(
         model: nn.Module,
         X_train: torch.Tensor,
@@ -39,6 +60,7 @@ def fit(
 
     history = {"train_loss": [], "test_loss": []}
 
+    early_stopping = EarlyStopping(patience=5, min_delta=0.01)
 
     with tqdm(range(epochs), unit="batch", disable=not verbose) as tepoch:
         
@@ -47,7 +69,6 @@ def fit(
             model.train()
             train_loss = 0
             for X_batch, desc_batch, y_batch in train_loader:
-                # X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                 optimizer.zero_grad()
                 y_pred = model(X_batch, desc_batch)
                 loss = criterion(y_pred, y_batch)
@@ -79,5 +100,16 @@ def fit(
                 gmean = 100. * gmean.compute().cpu().numpy(),
             )
             tepoch.update(1)
+
+
+            early_stopping(history["test_loss"][-1])
+            if early_stopping.early_stop:
+                print(f"Early stopping at epoch {epoch}")
+                break
             
-    return model, history
+            if len(history["test_loss"]) == 0 or test_loss < min(history["test_loss"]):
+                best_model_state = model.state_dict()
+                torch.save(best_model_state, 'best_model.pth')
+
+    return best_model_state, history
+   

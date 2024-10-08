@@ -19,7 +19,7 @@ from utils import get_device, PREPROCESSED_FILE, LOANS_FILE
 
 def pipeline(
         loans_file: Path | str = LOANS_FILE,
-        model: CREModel = CREModel(),
+        model: CREModel = CREModel(dropout=0.3),
         nlp_model: Callable = StanfordNLP(),
         do_preprocessing: bool = True,
         epochs: int = 100,
