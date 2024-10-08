@@ -1,6 +1,8 @@
 from src.data.features import select_features, DataType, features, features_numerical
 from src.data.stanfordnlp import StanfordNLP
 
+from utils import RANDOM_STATE
+
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
@@ -80,11 +82,11 @@ def split_data(df: pd.DataFrame, get_dev_set: bool = True) -> pd.DataFrame:
     X, y = df[ftrs], df[["loan_status"]]
 
     if get_dev_set:
-        X_train, X_devtest, y_train, y_devtest = train_test_split(X, y, test_size=.2, shuffle=False)
-        X_dev, X_test, y_dev, y_test = train_test_split(X_devtest, y_devtest, test_size=.5, shuffle=False)
+        X_train, X_devtest, y_train, y_devtest = train_test_split(X, y, test_size=.2, shuffle=True, random_state=RANDOM_STATE)
+        X_dev, X_test, y_dev, y_test = train_test_split(X_devtest, y_devtest, test_size=.5, shuffle=True, random_state=RANDOM_STATE)
 
     else:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.1, shuffle=False)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.1, shuffle=True, random_state=RANDOM_STATE)
         return X_train, X_test, y_train, y_test,
 
     return X_train, X_dev, X_test, y_train, y_dev, y_test
@@ -155,13 +157,13 @@ def preprocess_data(
     print("Normalize...")
     X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
-    X_train = torch.Tensor(X_train.values)
-    X_dev = torch.Tensor(X_dev.values)
-    X_test = torch.Tensor(X_test.values)
+    X_train = torch.Tensor(X_train.astype(float).values)
+    X_dev = torch.Tensor(X_dev.astype(float).values)
+    X_test = torch.Tensor(X_test.astype(float).values)
     
-    y_train = torch.Tensor(y_train.values)
-    y_dev = torch.Tensor(y_dev.values)
-    y_test = torch.Tensor(y_test.values)
+    y_train = torch.Tensor(y_train.astype(float).values)
+    y_dev = torch.Tensor(y_dev.astype(float).values)
+    y_test = torch.Tensor(y_test.astype(float).values)
 
     if concat_train_dev_sets:
         X_train = torch.cat((X_train, X_dev), dim=0)

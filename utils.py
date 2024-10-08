@@ -1,7 +1,7 @@
 import torch
 from pathlib import Path
 
-
+RANDOM_STATE = 42
 LOANS_FILE = Path("data/accepted_2007_to_2018Q4.csv")
 PREPROCESSED_FILE = Path("data/preprocessed/") # Path("data/preprocessed_no_sw/") 
 
