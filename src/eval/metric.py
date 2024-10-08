@@ -18,7 +18,7 @@ class GMean:
     
     def update(self, input: torch.Tensor, target: torch.Tensor):
         inp = torch.argmax(input, dim=1)
-        tgt = torch.argmax(target, dim=1)
+        tgt = target
         self.inputs = inp if isinstance(self.inputs, list) else torch.cat([self.inputs, inp])
         self.targets = tgt if isinstance(self.targets, list) else torch.cat([self.targets, tgt])
 
@@ -55,6 +55,6 @@ class ROCAUC(BinaryAUROC):
     
     def __call__(self, input: torch.Tensor, target: torch.Tensor) -> None:
         inp = torch.argmax(input, dim=1)
-        tgt = torch.argmax(target, dim=1)
+        tgt = target
         self.update(inp, tgt)
     

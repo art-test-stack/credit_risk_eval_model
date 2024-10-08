@@ -57,7 +57,7 @@ def fit(
         lr=lr, 
         weight_decay=weight_decay
     )
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(reduction="sum")
     # criterion = nn.BCEWithLogitsLoss()
     auc = ROCAUC()
     gmean = GMean()
@@ -79,7 +79,7 @@ def fit(
                 loss = criterion(y_pred, y_batch)
                 loss.backward()
                 optimizer.step()
-                train_loss += loss.item() * len(X_batch)
+                train_loss += loss.item()
             history["train_loss"].append(train_loss / len(train_loader.dataset))
 
             if X_test is not None and y_test is not None:
@@ -92,7 +92,7 @@ def fit(
                         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                         y_pred = model(X_batch, desc_batch)
                         loss = criterion(y_pred, y_batch)
-                        test_loss += loss.item() * len(X_batch)
+                        test_loss += loss.item()
                         auc(y_pred, y_batch)
                         gmean(y_pred, y_batch)
 

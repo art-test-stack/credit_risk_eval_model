@@ -21,8 +21,8 @@ class StanfordNLP:
             emb_dim: int = 200,
             stop_words: bool = False,
         ) -> None:
-        nltk.download('stopwords')
-        stanza.download('en')
+        # nltk.download('stopwords')
+        # stanza.download('en')
         self.stop_words = set(stopwords.words('english'))
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.corenlp = stanza.Pipeline(

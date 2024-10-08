@@ -64,8 +64,8 @@ def pipeline(
     test_desc = test_desc.to(device)
     y_test = y_test.to(device)
     
-    y_train = F.one_hot(y_train.to(torch.int64)).to(torch.float).reshape(-1,2)
-    y_test = F.one_hot(y_test.to(torch.int64)).to(torch.float).reshape(-1,2)
+    # y_train = F.one_hot(y_train.to(torch.int64)).to(torch.float).reshape(-1,2)
+    # y_test = F.one_hot(y_test.to(torch.int64)).to(torch.float).reshape(-1,2)
     print(y_train.shape)
     print(y_test.shape)
     print("X_train.device", X_train.device)

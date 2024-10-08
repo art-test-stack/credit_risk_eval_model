@@ -9,8 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
+from imblearn.combine import SMOTETomek
 
-import math
 
 import torch
 from pathlib import Path
@@ -112,14 +112,29 @@ def normalize(
 
 def balance_training_data(
         X: pd.DataFrame,
-        y: pd.DataFrame
+        y: pd.DataFrame,
+        enhanced_balance: bool = True
     ) -> Tuple[pd.DataFrame,torch.Tensor, pd.DataFrame]:
 
-    ros = RandomOverSampler(sampling_strategy=0.5, random_state=RANDOM_STATE)
-    X_resampled, y_resampled = ros.fit_resample(X, y)
+    if enhanced_balance:
+        desc = X["desc"].copy()
+        X = X.drop(columns=["desc"])
 
-    rus = RandomUnderSampler(sampling_strategy=1.0, random_state=RANDOM_STATE)
-    X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
+        smote_tomek = SMOTETomek(random_state=42)
+        X_resampled, y_resampled = smote_tomek.fit_resample(X, y)
+
+        resampled_indices = smote_tomek.sample_indices_
+
+        X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
+        # resampled_df[target_column] = y_resampled
+        X["desc"] = desc.iloc[resampled_indices].values
+
+    else:
+        ros = RandomOverSampler(sampling_strategy=0.5, random_state=RANDOM_STATE)
+        X_resampled, y_resampled = ros.fit_resample(X, y)
+
+        rus = RandomUnderSampler(sampling_strategy=1.0, random_state=RANDOM_STATE)
+        X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
 
     return X_resampled, y_resampled 
 
@@ -143,7 +158,6 @@ def preprocess_data(
     print("Balance training set...")
     X_train, y_train = balance_training_data(X_train, y_train)
     
-
     print("Preprocess training textual features...")
     train_desc = preprocess_textual_feature(X_train, nlp_model)
     dev_desc = preprocess_textual_feature(X_dev, nlp_model)
