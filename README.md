@@ -138,32 +138,57 @@ A dropout strategy of 0.3 (value not precised in the article) is used for the TE
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/arthurtestard/credit_risk_eval_model.git
+    git clone git@github.com:art-test-stack/credit_risk_eval_model.git
     ```
 2. Navigate to the project directory:
     ```sh
     cd credit_risk_eval_model
     ```
-3. Install the required dependencies:
-    ```sh
-    pip install -r requirements.txt
-    ```
+3. Create a virtual environment
+    
+    For example I use [virtualenv](https://virtualenv.pypa.io/en/latest/):
+   ```sh
+   virtualenv -p python 3.10 venv
+   ```
+  
+4. Install Python depedencies:
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-<!-- ## Usage
+5. Download the GloVe on Glove's [website](https://nlp.stanford.edu/projects/glove/) and put the `200d` model file in the `model/glove.6B/` folder (more details on that [README.md](model/glove.6B/README.md)).
 
-1. Preprocess the data:
-    ```sh
-    python preprocess.py
-    ```
-2. Train the model:
-    ```sh
-    python train.py
-    ```
-3. Evaluate the model:
-    ```sh
-    python evaluate.py
-    ``` -->
+6. Download the LendingClub dataset from [Kaggle](https://www.kaggle.com/datasets/wordsforthewise/lending-club?resource=download) and put the `.csv` file in the `data/` folder. 
 
+> [!WARNING] 
+> Make sure that the `.csv` file name match the one in the variable `LOANS_FILE` from [`utils.py`](utils.py).
+
+## Usage
+
+Once all the installation steps are done, you can do the preprocessing, train, and evaluate the model by running the following command:
+
+```sh
+python main.py
+```
+
+You can then add different arguments to the command line to change the model's parameters. For example, if you already done a preprocessing, you can skip it, if you want to train another model from the same data, by running:
+
+```sh
+python main.py --skip_preprocessing
+```
+
+Here the list of the different arguments:
+
+- `--use_stopwords`: Use the stopwords from the `nltk` package.
+- `--skip_preprocessing`: Skip the preprocessing step.
+- `--epochs`: Number of epochs to train the model.
+- `--batch_size`: Batch size for training.
+- `--dropout`: Dropout rate for the model.
+- `--early_stopping_patience`: Number of epochs with no improvement after which training will be stopped.
+- `--early_stopping_min_delta`: Minimum value to improve model in early stopping.
+- `--glove_path`: Path to the GloVe embeddings file.
+- `--model_name`: Name of the trained model to find its `.pt` file and its training loss.
+- `--verbose`: Print information during the training.
 
 
 ## References

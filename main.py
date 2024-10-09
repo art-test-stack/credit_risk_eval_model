@@ -19,15 +19,15 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-sw",
-        "--use_sw",
+        "--use_stopwords",
         help="Use stop words",
         action="store_true",
     )
     parser.add_argument(
-        "-no_pp",
-        "--do_preprocessing",
-        help="Do data preprocessing",
-        action="store_true",
+        "-sp",
+        "--skip_preprocessing",
+        help="Skip preprocessing",
+        action="store_false",
     )
     parser.add_argument(
         "-e",
@@ -79,8 +79,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    use_sw = args.use_sw
-    do_preprocessing = args.do_preprocessing
+    use_sw = args.use_stopwords
+    skip_preprocessing = args.skip_preprocessing
     epochs = args.epochs
     dropout = args.dropout
     batch_size = args.batch_size
@@ -99,9 +99,9 @@ if __name__ == "__main__":
     assert epochs > 0, "Number of epochs must be positive"
     assert batch_size > 0, "Batch size must be positive"
     assert early_stopping_patience > 0, "Early stopping patience must be positive"
-    assert early_stopping_min_delta > 0, "Early stopping min delta must be positive"
+    assert early_stopping_min_delta >= 0, "Early stopping min delta must be positive or equal to zero"
     assert preprocessed_file.exists(), "Preprocessed folder file does not exist"
-    if not do_preprocessing:
+    if skip_preprocessing:
         assert preprocessed_file.joinpath("X_train.pt").exists(), "No preprocessed data found, please preprocess the data first by setting do_preprocessing to True"
     assert LOANS_FILE.exists(), "Loans file does not exist"
     assert GLOVE_MODEL.exists(), "Glove model file does not exist, please download it following the instructions in model/glove.6B/README"
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         nlp_model=StanfordNLP(stop_words=use_sw, verbose=verbose),
         loans_file=LOANS_FILE,
         device=get_device(),
-        do_preprocessing=do_preprocessing,
+        do_preprocessing=not skip_preprocessing,
         epochs=epochs,
         batch_size=batch_size,
         early_stopping_patience=early_stopping_patience,
