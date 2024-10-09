@@ -184,8 +184,11 @@ python main.py --skip_preprocessing
 
 Here the list of the different arguments:
 
-- `--use_stopwords`: Use the stopwords from the `nltk` package. *Default: True*
-- `--skip_preprocessing`: Skip the preprocessing step. *Default: False*
+- `--no_stopwords` **(flag)**: Disable the stopwords from the `nltk` package.
+- `--not_balance_dataset` **(flag)**: To not balance the training set.
+- `--skip_preprocessing` **(flag)**: Skip the preprocessing step.
+- `--not_verbose` **(flag)**: Disable print information during the training.
+
 - `--epochs`: Number of epochs to train the model. *Default: 500*
 - `--batch_size`: Batch size for training. *Default: 1024*
 - `--dropout`: Dropout rate for the model. *Default: 0.3*
@@ -193,7 +196,7 @@ Here the list of the different arguments:
 - `--early_stopping_min_delta`: Minimum value to improve model in early stopping. *Default: 0.0001*
 <!-- - `--glove_path`: Path to the GloVe embeddings file. *Default: 'model/glove.6B/glove.6B.200d.txt'* -->
 - `--model_name`: Name of the trained model to find its `.pt` file and its training loss. *Default: 'model.pt'*
-- `--verbose`: Print information during the training. *Default: True*
+
 
 
 ## References

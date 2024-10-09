@@ -19,7 +19,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-sw",
-        "--use_stopwords",
+        "--no_stopwords",
         help="Use stop words",
         action="store_true",
     )
@@ -27,6 +27,12 @@ if __name__ == "__main__":
         "-sp",
         "--skip_preprocessing",
         help="Skip preprocessing",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-bd",
+        "--not_balance_dataset",
+        help="Balance training set",
         action="store_true",
     )
     parser.add_argument(
@@ -66,8 +72,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-v",
-        "--verbose",
-        help="Verbose",
+        "--not_verbose",
+        help="Disable verbose",
         action="store_true",
     )
     parser.add_argument(
@@ -79,19 +85,28 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    use_sw = args.use_stopwords
+    use_sw = not args.no_stopwords
+    balance_training_set = not args.not_balance_dataset
     skip_preprocessing = args.skip_preprocessing
     epochs = args.epochs
     dropout = args.dropout
     batch_size = args.batch_size
     early_stopping_patience = args.early_stopping_patience
     early_stopping_min_delta = args.early_stopping_min_delta
-    verbose = args.verbose
+    verbose = not args.not_verbose
 
-    if use_sw:
+
+    if use_sw and balance_training_set:
         preprocessed_file = PREPROCESSED_FILE
-    else:
+    elif use_sw and not balance_training_set:
+        preprocessed_file = Path("data/preprocessed_not_b/")
+    elif not use_sw and balance_training_set:
         preprocessed_file = Path("data/preprocessed_no_sw/") 
+    else: 
+        preprocessed_file = Path("data/preprocessed_no_sw_not_b/") 
+    
+    if not preprocessed_file.exists():
+        preprocessed_file.mkdir(parents=True, exist_ok=True)
     
     model_name = args.model_name if args.model_name[-3:]==".pt" else args.model_name + ".pt"
 
@@ -100,7 +115,7 @@ if __name__ == "__main__":
     assert batch_size > 0, "Batch size must be positive"
     assert early_stopping_patience > 0, "Early stopping patience must be positive"
     assert early_stopping_min_delta >= 0, "Early stopping min delta must be positive or equal to zero"
-    assert preprocessed_file.exists(), "Preprocessed folder file does not exist"
+    assert preprocessed_file.exists(), f"Preprocessed folder file does not exist, please create: '{preprocessed_file}'"
     if skip_preprocessing:
         assert preprocessed_file.joinpath("X_train.pt").exists(), "No preprocessed data found, please preprocess the data first by setting do_preprocessing to True"
     assert LOANS_FILE.exists(), "Loans file does not exist"
@@ -113,6 +128,7 @@ if __name__ == "__main__":
         loans_file=LOANS_FILE,
         device=get_device(),
         do_preprocessing=not skip_preprocessing,
+        balance_training_set=balance_training_set,
         epochs=epochs,
         batch_size=batch_size,
         early_stopping_patience=early_stopping_patience,

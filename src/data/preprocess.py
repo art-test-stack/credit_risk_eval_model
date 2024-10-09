@@ -143,12 +143,13 @@ def balance_training_data(
 def preprocess_data( 
         nlp_model: Callable, #= StanfordNLP(), 
         preprocessed_data_file: Path,
-        file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
+        loans_file: Union[str, Path], 
         concat_train_dev_sets: bool = False,
+        balance_training_set: bool = True,
         normalize_first: bool = False, # False has to be implemented and tried,
         verbose: bool = True
     ) -> pd.DataFrame:
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(loans_file)
 
     if verbose:
         print("Select features...")
@@ -163,8 +164,9 @@ def preprocess_data(
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
     if verbose:
-        print("Balance training set...")
-    X_train, y_train = balance_training_data(X_train, y_train)
+        print("Balance training set..." if balance_training_set else "Training set not balanced...")
+    if balance_training_set:
+        X_train, y_train = balance_training_data(X_train, y_train)
     
     if verbose:
         print("Preprocess training textual features...")

@@ -6,9 +6,9 @@ from typing import Dict
 import numpy as np
 
 
-def plot_losses(hist: Dict[str,np.ndarray], display: bool = False):
+def plot_losses(hist: Dict[str,str | np.ndarray], display: bool = False):
 
-    folder = Path('rsc/').joinpath(f"losses_{hist["model_name"][:-3]}.png")
+    folder = Path('rsc/').joinpath(f"losses_{hist['model_name'][:-3]}.png")
     plt.ioff()
 
     fig = plt.figure()
