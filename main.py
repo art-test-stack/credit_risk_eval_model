@@ -27,7 +27,7 @@ if __name__ == "__main__":
         "-sp",
         "--skip_preprocessing",
         help="Skip preprocessing",
-        action="store_false",
+        action="store_true",
     )
     parser.add_argument(
         "-e",
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         "-n",
         "--model_name",
         type=str,
-        required=False,
+        default="model.pt",
     )
 
     args = parser.parse_args()
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     else:
         preprocessed_file = Path("data/preprocessed_no_sw/") 
     
-    model_name = (args.model_name if args.model_name[-3:]==".pt" else args.model_name + ".pt") if args.model_name else "model.pt"
+    model_name = args.model_name if args.model_name[-3:]==".pt" else args.model_name + ".pt"
 
     assert 0 <= dropout < 1, "Dropout rate must be in [0, 1)"
     assert epochs > 0, "Number of epochs must be positive"

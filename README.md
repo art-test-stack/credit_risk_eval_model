@@ -14,7 +14,7 @@ The dataset is from [LendingClub, [2]](https://www.lendingclub.com/) loans data 
 
 Since LendingClub does not provide anymore this data, the dataset used have been taken from [Kaggle](https://www.kaggle.com/datasets/wordsforthewise/lending-club?resource=download). 
 
-In this section the dataset used will be presented, the feature selection -as in the original paper- will be described, and it characteristics will be compared to the one used in the paper.
+In this section the dataset used will be presented, the feature selection -as in the original paper- will be described, and its characteristics will be compared to the one used in the paper.
 
 ### Definitions and Descriptions of Variables from LendingClub
 
@@ -73,6 +73,7 @@ Hence, as mentioned in the article, I used the loans issued during the period of
 | Default  | 10151 | 61.52 | 58.24 | 21 | 46 | 64 |
 | All      | 69276 | 61.04 | 54.64 | 31 | 47 | 64 |
 
+
 #### Comparison of cross Table on Continuous Variables for LendingClub Data (from paper's and processed's data)
 
 | Variable                | Default (Mean) | Default (Median) | Default (Std) | Paid off (Mean) | Paid off (Median) | Paid off (Std) | Pbc         |
@@ -126,12 +127,16 @@ A dropout strategy of 0.3 (value not precised in the article) is used for the TE
 
 ## Metrics
 
+The model is evaluated on the test-set using the [ROC-AUC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) and G-MEAN metrics. The ROC-AUC is the area under the receiver operating characteristic curve, which is a plot of the true positive rate against the false positive rate. The G-MEAN is the geometric mean of the true positive rate and the true negative rate. The ROC-AUC is a measure of the model's ability to distinguish between the positive and negative classes, while the G-MEAN is a measure of the model's ability to balance the true positive and true negative rates. Both are effective metrics for imbalanced data sets [(Gong et al., 2017)](#references). 
+
+The G-mean is defined as follows:
+$$G_{mean} = \sqrt{\left(\frac{TP}{TP + FN}\right)\left(\frac{TN}{TN + FP}\right)}$$
 
 ## Results
 
 | Measures   | TE from the paper |  TE with stopwords | TE without stopwords |
 |------------|-------------------|--------------------|--------------------|
-| AUC (%)    | 70.30             | 65.74              | Na                 |
+| ROC-AUC (%) | 70.30         | 65.74              | Na                 |
 | G-MEAN (%) | 65.32             | 65.80              | Na                 |
 
 ## Installation
@@ -179,38 +184,37 @@ python main.py --skip_preprocessing
 
 Here the list of the different arguments:
 
-- `--use_stopwords`: Use the stopwords from the `nltk` package.
-- `--skip_preprocessing`: Skip the preprocessing step.
-- `--epochs`: Number of epochs to train the model.
-- `--batch_size`: Batch size for training.
-- `--dropout`: Dropout rate for the model.
-- `--early_stopping_patience`: Number of epochs with no improvement after which training will be stopped.
-- `--early_stopping_min_delta`: Minimum value to improve model in early stopping.
-- `--glove_path`: Path to the GloVe embeddings file.
-- `--model_name`: Name of the trained model to find its `.pt` file and its training loss.
-- `--verbose`: Print information during the training.
+- `--use_stopwords`: Use the stopwords from the `nltk` package. *Default: True*
+- `--skip_preprocessing`: Skip the preprocessing step. *Default: False*
+- `--epochs`: Number of epochs to train the model. *Default: 500*
+- `--batch_size`: Batch size for training. *Default: 1024*
+- `--dropout`: Dropout rate for the model. *Default: 0.3*
+- `--early_stopping_patience`: Number of epochs with no improvement after which training will be stopped. *Default: 100*
+- `--early_stopping_min_delta`: Minimum value to improve model in early stopping. *Default: 0.0001*
+<!-- - `--glove_path`: Path to the GloVe embeddings file. *Default: 'model/glove.6B/glove.6B.200d.txt'* -->
+- `--model_name`: Name of the trained model to find its `.pt` file and its training loss. *Default: 'model.pt'*
+- `--verbose`: Print information during the training. *Default: True*
 
 
 ## References
 
 1. Zhang, et al. (2020). "Credit risk evaluation model with textual features from loan descriptions for P2P lending." *Electronic Commerce Research and Applications*, 39, 100989. [pdf](https://doi.org/10.1016/j.elerap.2020.100989)
 
-2. LendingClub. (n.d.). LendingClub loans data. Retrieved from [https://www.lendingclub.com/](https://www.lendingclub.com/)
+2. Milad Malekipirbazari, Vural Aksakalli, "Risk assessment in social lending via random forests," *Expert Systems with Applications*, Volume 42, Issue 10, 2015, Pages 4621-4631, ISSN 0957-4174, [pdf](https://doi.org/10.1016/j.eswa.2015.02.001).
 
-3. Milad Malekipirbazari, Vural Aksakalli, "Risk assessment in social lending via random forests," *Expert Systems with Applications*, Volume 42, Issue 10, 2015, Pages 4621-4631, ISSN 0957-4174, [pdf](https://doi.org/10.1016/j.eswa.2015.02.001).
+3. Nitesh V Chawla, Kevin W Bowyer, Lawrence O Hall, and W Philip Kegelmeyer. (2002). "SMOTE: Synthetic Minority Over-sampling Technique." *Journal of Artificial Intelligence Research*, 16, 321–357.
 
-4. Nitesh V Chawla, Kevin W Bowyer, Lawrence O Hall, and W Philip Kegelmeyer. (2002). "SMOTE: Synthetic Minority Over-sampling Technique." *Journal of Artificial Intelligence Research*, 16, 321–357.
+4. Ivan Tomek. (1976). "Two modifications of cnn." *IEEE Transactions on Systems, Man, and Cybernetics*, 6, 769–772.
 
-5. Ivan Tomek. (1976). "Two modifications of cnn." *IEEE Transactions on Systems, Man, and Cybernetics*, 6, 769–772.
+5. Jason Brownlee. (2021). "Random Oversampling and Undersampling for Imbalanced Classification." Retrieved from [article](https://machinelearningmastery.com/random-oversampling-and-undersampling-for-imbalanced-classification/#:~:text=Random%20oversampling%20duplicates%20examples%20from,information%20invaluable%20to%20a%20model).
 
-6. Jason Brownlee. (2021). "Random Oversampling and Undersampling for Imbalanced Classification." Retrieved from [article](https://machinelearningmastery.com/random-oversampling-and-undersampling-for-imbalanced-classification/#:~:text=Random%20oversampling%20duplicates%20examples%20from,information%20invaluable%20to%20a%20model).
+6. Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. (2014). "The Stanford CoreNLP Natural Language Processing Toolkit." *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. [pdf](https://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf).
 
-7. Manning, Christopher D., Mihai Surdeanu, John Bauer, Jenny Finkel, Steven J. Bethard, and David McClosky. (2014). "The Stanford CoreNLP Natural Language Processing Toolkit." *Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics: System Demonstrations*, pp. 55-60. [pdf](https://nlp.stanford.edu/pubs/StanfordCoreNlp2014.pdf).
+7. Jeffrey Pennington, Richard Socher, and Christopher D. Manning. (2014). "GloVe: Global Vectors for Word Representation." [pdf](https://nlp.stanford.edu/pubs/glove.pdf)
 
-8. Jeffrey Pennington, Richard Socher, and Christopher D. Manning. (2014). "GloVe: Global Vectors for Word Representation." [pdf](https://nlp.stanford.edu/pubs/glove.pdf)
+8. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. (2017). "Attention is All You Need." *Advances in Neural Information Processing Systems*, 30, 5998-6008. [pdf](https://arxiv.org/abs/1706.03762)
 
-9. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. (2017). "Attention is All You Need." *Advances in Neural Information Processing Systems*, 30, 5998-6008. [pdf](https://arxiv.org/abs/1706.03762)
-
+9. Gong, Joonho, Kim, Hyunjoong. (2017). "Rhsboost: Improving classification performance in imbalance data." *Computational Statistics & Data Analysis*, 111, 1–13. [pdf](https://doi.org/10.1016/j.csda.2017.01.005)
 
 
 ## License
