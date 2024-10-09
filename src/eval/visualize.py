@@ -6,7 +6,7 @@ from typing import Dict
 import numpy as np
 
 def plot_losses(hist: Dict[str,np.ndarray], display: bool = False):
-    folder = Path('rsc/').joinpath('losses.png')
+    folder = Path('rsc/').joinpath('losses_no_sw_neweval2_do_30.png')
     plt.ioff()
 
     fig = plt.figure()
