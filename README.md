@@ -137,8 +137,8 @@ $$G_{mean} = \sqrt{\left(\frac{TP}{TP + FN}\right)\left(\frac{TN}{TN + FP}\right
 
 | Measures   | TE from the paper |  TE with stopwords | TE without stopwords |
 |------------|-------------------|--------------------|--------------------|
-| ROC-AUC (%) | 70.30         | 65.74              | Na                 |
-| G-MEAN (%) | 65.32             | 65.80              | Na                 |
+| ROC-AUC (%) | 70.30         | 65.74              | 65.91                 |
+| G-MEAN (%) | 65.32             | 65.80              | 66.48                |
 
 ## Installation
 
