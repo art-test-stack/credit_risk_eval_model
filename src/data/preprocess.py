@@ -67,7 +67,7 @@ def preprocess_hard_features(df: pd.DataFrame) -> pd.DataFrame:
  
 def preprocess_textual_feature(
         df: pd.DataFrame, 
-        nlp_model: Callable = StanfordNLP(),
+        nlp_model: Callable, # = StanfordNLP(),
     ) -> torch.Tensor:
 
     embeddings = nlp_model.process_batch(df["desc"].values)
@@ -116,34 +116,36 @@ def balance_training_data(
         enhanced_balance: bool = True
     ) -> Tuple[pd.DataFrame,torch.Tensor, pd.DataFrame]:
 
-    if enhanced_balance:
-        desc = X["desc"].copy()
-        X = X.drop(columns=["desc"])
+    # if enhanced_balance:
+    #     desc = X["desc"].copy()
+    #     X = X.drop(columns=["desc"])
 
-        smote_tomek = SMOTETomek(random_state=42)
-        X_resampled, y_resampled = smote_tomek.fit_resample(X, y)
+    #     smote_tomek = SMOTETomek(random_state=42)
+    #     X_resampled, y_resampled = smote_tomek.fit_resample(X, y)
 
-        resampled_indices = smote_tomek.sample_indices_
+    #     resampled_indices = smote_tomek.sample_indices_
 
-        X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
-        # resampled_df[target_column] = y_resampled
-        X["desc"] = desc.iloc[resampled_indices].values
+    #     X_resampled = pd.DataFrame(X_resampled, columns=X.columns)
+    #     # resampled_df[target_column] = y_resampled
+    #     X["desc"] = desc.iloc[resampled_indices].values
 
-    else:
-        ros = RandomOverSampler(sampling_strategy=0.5, random_state=RANDOM_STATE)
-        X_resampled, y_resampled = ros.fit_resample(X, y)
+    # else:
+    #     pass
+    ros = RandomOverSampler(sampling_strategy=0.5, random_state=RANDOM_STATE)
+    X_resampled, y_resampled = ros.fit_resample(X, y)
 
-        rus = RandomUnderSampler(sampling_strategy=1.0, random_state=RANDOM_STATE)
-        X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
+    rus = RandomUnderSampler(sampling_strategy=1.0, random_state=RANDOM_STATE)
+    X_resampled, y_resampled = rus.fit_resample(X_resampled, y_resampled)
 
     return X_resampled, y_resampled 
 
 
-def preprocess_data(
+def preprocess_data( 
+        nlp_model: Callable, #= StanfordNLP(), 
+        preprocessed_data_file: Path,
         file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
-        nlp_model: Callable = StanfordNLP(), 
         concat_train_dev_sets: bool = False,
-        normalize_first: bool = False # False has to be implemented and tried
+        normalize_first: bool = False # False has to be implemented and tried,
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
@@ -179,7 +181,15 @@ def preprocess_data(
         X_train = torch.cat((X_train, X_dev), dim=0)
         y_train = torch.cat((y_train, y_dev), dim=0)
         train_desc = torch.cat((train_desc, dev_desc), dim=0)
-        
+    
+    print("Saving preprocessed data...")
+    torch.save(X_train, preprocessed_data_file.joinpath("X_train.pt"))
+    torch.save(train_desc, preprocessed_data_file.joinpath("train_desc.pt"))
+    torch.save(y_train, preprocessed_data_file.joinpath("y_train.pt"))
+
+    torch.save(X_test, preprocessed_data_file.joinpath("X_test.pt"))
+    torch.save(test_desc, preprocessed_data_file.joinpath("test_desc.pt"))
+    torch.save(y_test, preprocessed_data_file.joinpath("y_test.pt"))
 
     return (X_train, train_desc, y_train), (X_test, test_desc, y_test), (X_dev, dev_desc, y_dev)
 

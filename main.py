@@ -2,14 +2,17 @@ from src.pipeline import pipeline
 from src.model.model import CREModel
 from src.data.stanfordnlp import StanfordNLP
 
-from utils import get_device, PREPROCESSED_FILE, LOANS_FILE
+from utils import get_device, PREPROCESSED_FILE, LOANS_FILE, RANDOM_STATE
 
+import torch 
 from pathlib import Path
 
 
 if __name__ == "__main__":
-    use_sw = True
-    do_preprocessing = False
+    torch.manual_seed(RANDOM_STATE)
+    
+    use_sw = False
+    do_preprocessing = True
 
     if use_sw:
         preprocessed_file = PREPROCESSED_FILE

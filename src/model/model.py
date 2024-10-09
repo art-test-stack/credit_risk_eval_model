@@ -21,6 +21,7 @@ class CREModel(nn.Module):
             te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
         ) -> None:
         super().__init__()
+        self.dropout_rate = dropout
         self.te = TransformerEncoder(
             d_model=d_model,
             nhead=nhead,
@@ -31,11 +32,14 @@ class CREModel(nn.Module):
         )
         self.dff = nn.Sequential(
             nn.Linear(d_model + dim_ft - 1, 10),
-            nn.ReLU(),
             nn.Dropout(dropout),
+            nn.ReLU(),
+            nn.Linear(10, 10),
+            nn.Dropout(dropout),
+            nn.ReLU(),
             nn.Linear(10, 2),
-            nn.ReLU(),
             nn.Dropout(dropout),
+            nn.ReLU(),
             nn.Softmax(dim=-1)
         )
         

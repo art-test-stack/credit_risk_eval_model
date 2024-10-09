@@ -30,22 +30,13 @@ def pipeline(
     print("Start preprocessing data...")
     if do_preprocessing:
         train_set, test_set, dev_set = preprocess_data(
-            loans_file, nlp_model, concat_train_dev_sets=True)
+            nlp_model, preprocessed_data_file, loans_file, concat_train_dev_sets=True)
 
         X_train, train_desc, y_train = train_set
         X_test, test_desc, y_test = test_set
         X_dev, dev_desc, y_dev = dev_set
 
         print(X_train.shape, train_desc.shape, y_train.shape)
-
-        print("Saving preprocessed data...")
-        torch.save(X_train, preprocessed_data_file.joinpath("X_train.pt"))
-        torch.save(train_desc, preprocessed_data_file.joinpath("train_desc.pt"))
-        torch.save(y_train, preprocessed_data_file.joinpath("y_train.pt"))
-
-        torch.save(X_test, preprocessed_data_file.joinpath("X_test.pt"))
-        torch.save(test_desc, preprocessed_data_file.joinpath("test_desc.pt"))
-        torch.save(y_test, preprocessed_data_file.joinpath("y_test.pt"))
 
     if not do_preprocessing:
         X_train = torch.load(preprocessed_data_file.joinpath("X_train.pt"))
@@ -64,6 +55,8 @@ def pipeline(
     test_desc = test_desc.to(device)
     y_test = y_test.to(device)
     
+    y_train = y_train.to(torch.int64).reshape(-1)
+    y_test = y_test.to(torch.int64).reshape(-1)
     # y_train = F.one_hot(y_train.to(torch.int64)).to(torch.float).reshape(-1,2)
     # y_test = F.one_hot(y_test.to(torch.int64)).to(torch.float).reshape(-1,2)
     print(y_train.shape)
@@ -89,7 +82,7 @@ def pipeline(
         epochs=epochs, 
         batch_size=1024, 
         lr=1e-4, 
-        weight_decay=1e-5, 
+        weight_decay=1e-4, 
         device=device, 
         verbose=True
     )
