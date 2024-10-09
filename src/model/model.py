@@ -4,7 +4,7 @@ import torch
 from torch import nn
 
 from typing import Callable, Union
-
+from pathlib import Path
 
 class CREModel(nn.Module):
     """
@@ -12,6 +12,7 @@ class CREModel(nn.Module):
     """
     def __init__(
             self, 
+            name: Path,
             d_model: int = 200,
             nhead: int = 8,
             dim_ffn: int = 50,
@@ -21,6 +22,7 @@ class CREModel(nn.Module):
             te_act: Union[str, Callable[[torch.Tensor], torch.Tensor]] = nn.ReLU(),
         ) -> None:
         super().__init__()
+        self.name = name
         self.dropout_rate = dropout
         self.te = TransformerEncoder(
             d_model=d_model,

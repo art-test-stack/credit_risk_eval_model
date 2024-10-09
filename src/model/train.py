@@ -1,6 +1,6 @@
 from src.eval.metric import ROCAUC, GMean
 from src.model.model import CREModel
-from utils import get_device
+from utils import get_device, MODEL_DIR
 
 # from src.model.test import _eval_by_batch
 
@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 
 from tqdm import tqdm
-from copy import deepcopy
 
 class EarlyStopping:
     def __init__(self, patience=5, min_delta=0.05):
@@ -48,6 +47,8 @@ def fit(
         batch_size: int = 32,
         lr: float = 1e-4,
         weight_decay: float = 1e-4,
+        patience: int = 100,
+        min_delta: float = 1e-4,
         device: str | torch.device = get_device(),
         verbose: bool = True
     ) -> Tuple[nn.Module, dict]:
@@ -58,17 +59,14 @@ def fit(
         weight_decay=weight_decay
     )
     criterion = nn.CrossEntropyLoss(reduction="sum")
-    # criterion = nn.BCEWithLogitsLoss()
     auc = ROCAUC()
     gmean = GMean()
     train_loader = DataLoader(TensorDataset(X_train, desc_train, y_train), batch_size=batch_size, shuffle=True)
     dev_loader = DataLoader(TensorDataset(X_test, desc_test, y_test), batch_size=batch_size, shuffle=False)
 
-    model_path = f"model/model_no_sw_do_{model.dropout_rate}_new_eval_2_.pt"
+    history = {"model_name": model.name, "train_loss": [], "test_loss": []}
 
-    history = {"train_loss": [], "test_loss": []}
-
-    early_stopping = EarlyStopping(patience=100, min_delta=1e-4)
+    early_stopping = EarlyStopping(patience=patience, min_delta=min_delta)
 
     with tqdm(range(epochs), unit="epoch", disable=not verbose) as tepoch:
         
@@ -118,7 +116,7 @@ def fit(
 
             if early_stopping.save_model:
                 best_model_state = model.state_dict()
-                torch.save(best_model_state, model_path)
+                torch.save(best_model_state, model.path)
 
             if early_stopping.early_stop:
                 print(f"Early stopping at epoch {epoch}")
@@ -127,7 +125,7 @@ def fit(
             
             tepoch.update(1)
 
-    best_model = CREModel()
-    best_model.load_state_dict(torch.load(model_path))
+    best_model = CREModel(model.name)
+    best_model.load_state_dict(torch.load(MODEL_DIR.joinpath(model.name)))
     return best_model, history
    

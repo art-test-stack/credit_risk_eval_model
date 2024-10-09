@@ -4,6 +4,8 @@ from pathlib import Path
 RANDOM_STATE = 42
 LOANS_FILE = Path("data/accepted_2007_to_2018Q4.csv")
 PREPROCESSED_FILE = Path("data/preprocessed/") # Path("data/preprocessed_no_sw/") 
+MODEL_DIR = Path("model/")
+GLOVE_MODEL = Path("model/glove.6B/glove.6B.200d.txt")
 
 def get_device():
     if torch.cuda.is_available():

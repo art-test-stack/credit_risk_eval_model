@@ -145,28 +145,35 @@ def preprocess_data(
         preprocessed_data_file: Path,
         file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
         concat_train_dev_sets: bool = False,
-        normalize_first: bool = False # False has to be implemented and tried,
+        normalize_first: bool = False, # False has to be implemented and tried,
+        verbose: bool = True
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
-    print("Select features...")
+    if verbose:
+        print("Select features...")
     df = select_features(df)
 
-    print("Preprocess hard-features...")
+    if verbose:
+        print("Preprocess hard-features...")
     df = preprocess_hard_features(df)
 
-    print("Split dataset...")
+    if verbose:
+        print("Split dataset...")
     X_train, X_dev, X_test, y_train, y_dev, y_test = split_data(df)
 
-    print("Balance training set...")
+    if verbose:
+        print("Balance training set...")
     X_train, y_train = balance_training_data(X_train, y_train)
     
-    print("Preprocess training textual features...")
+    if verbose:
+        print("Preprocess training textual features...")
     train_desc = preprocess_textual_feature(X_train, nlp_model)
     dev_desc = preprocess_textual_feature(X_dev, nlp_model)
     test_desc = preprocess_textual_feature(X_test, nlp_model)
 
-    print("Normalize...")
+    if verbose:
+        print("Normalize...")
     X_train, X_test, X_dev, = normalize(X_train, X_test, X_dev)
 
     X_train = torch.Tensor(X_train.astype(float).values)
@@ -182,7 +189,8 @@ def preprocess_data(
         y_train = torch.cat((y_train, y_dev), dim=0)
         train_desc = torch.cat((train_desc, dev_desc), dim=0)
     
-    print("Saving preprocessed data...")
+    if verbose:
+        print("Saving preprocessed data...")
     torch.save(X_train, preprocessed_data_file.joinpath("X_train.pt"))
     torch.save(train_desc, preprocessed_data_file.joinpath("train_desc.pt"))
     torch.save(y_train, preprocessed_data_file.joinpath("y_train.pt"))

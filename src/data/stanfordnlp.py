@@ -1,3 +1,5 @@
+from utils import GLOVE_MODEL
+
 import stanza
 import spacy
 import numpy as np
@@ -5,7 +7,6 @@ import torch
 import pandas as pd
 
 from typing import Tuple, List
-from pathlib import Path
 
 import nltk
 from nltk.corpus import stopwords
@@ -17,9 +18,9 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 class StanfordNLP:
     def __init__(
             self, 
-            glove_file_path: str = "model/glove.6B/glove.6B.200d.txt", 
             emb_dim: int = 200,
             stop_words: bool = False,
+            verbose: bool = True
         ) -> None:
         # nltk.download('stopwords')
         # stanza.download('en')
@@ -31,10 +32,11 @@ class StanfordNLP:
             use_gpu=torch.cuda.is_available(),
             device=self.device,
         )
+        self.verbose = verbose
         self.use_sw = stop_words
         # self.glove = spacy.load('en_core_web_lg')  # or 'en_vectors_web_lg' for larger GloVe vectors
 
-        self.glove = self.load_spacy_glove(glove_file_path)
+        self.glove = self.load_spacy_glove(GLOVE_MODEL)
         self.embedding_dim = emb_dim
 
     def load_spacy_glove(self, glove_file_path: str) -> spacy.language.Language:
@@ -84,13 +86,10 @@ class StanfordNLP:
             texts = texts["desc"].values
 
         if self.device == "cuda" and parralize:
-            print("Tokenize loan descriptions on cuda...")
             res = self.process_batch_cuda(texts, max_workers)
         elif self.device == "cpu" and parralize:
-            print("Tokenize loan descriptions on cpu using ProcessPoolExecutor...")
             res = self.process_batch_cpu(texts, max_workers)
         else:
-            print("Tokenize loan descriptions on cpu one by one...")
             res = np.array([ self(text) for text in tqdm(texts)])
         return res
     
@@ -101,6 +100,7 @@ class StanfordNLP:
                 executor.map(self, texts), 
                 total=len(texts), 
                 colour="blue",
+                disable=not self.verbose
             ):
                 res.append(emb)
         return np.array(res)
@@ -112,6 +112,7 @@ class StanfordNLP:
                 executor.map(self, texts), 
                 total=len(texts), 
                 colour="magenta",
+                disable=not self.verbose
             ):
                 res.append(emb)
         return res

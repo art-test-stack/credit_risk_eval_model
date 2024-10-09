@@ -18,25 +18,29 @@ from utils import get_device, PREPROCESSED_FILE, LOANS_FILE
 
 
 def pipeline(
+        model: CREModel,
+        nlp_model: Callable,
         loans_file: Path | str = LOANS_FILE,
-        model: CREModel = CREModel(dropout=0.3),
-        nlp_model: Callable = StanfordNLP(),
         do_preprocessing: bool = True,
         epochs: int = 100,
+        batch_size: int = 32,
+        early_stopping_patience: int = 100,
+        early_stopping_min_delta: float = 1e-4,
         device: str | torch.device = get_device(),
-        preprocessed_data_file: Path = PREPROCESSED_FILE
+        preprocessed_data_file: Path = PREPROCESSED_FILE,
+        verbose: bool = True
     ) -> Any:
     
     print("Start preprocessing data...")
     if do_preprocessing:
-        train_set, test_set, dev_set = preprocess_data(
-            nlp_model, preprocessed_data_file, loans_file, concat_train_dev_sets=True)
+        train_set, test_set, _ = preprocess_data(
+            nlp_model, preprocessed_data_file, loans_file, concat_train_dev_sets=True, verbose=verbose)
 
         X_train, train_desc, y_train = train_set
         X_test, test_desc, y_test = test_set
-        X_dev, dev_desc, y_dev = dev_set
 
-        print(X_train.shape, train_desc.shape, y_train.shape)
+        if verbose:
+            print(X_train.shape, train_desc.shape, y_train.shape)
 
     if not do_preprocessing:
         X_train = torch.load(preprocessed_data_file.joinpath("X_train.pt"))
@@ -59,15 +63,6 @@ def pipeline(
     y_test = y_test.to(torch.int64).reshape(-1)
     # y_train = F.one_hot(y_train.to(torch.int64)).to(torch.float).reshape(-1,2)
     # y_test = F.one_hot(y_test.to(torch.int64)).to(torch.float).reshape(-1,2)
-    print(y_train.shape)
-    print(y_test.shape)
-    print("X_train.device", X_train.device)
-    print("train_desc.device", train_desc.device)
-    print("y_train.device", y_train.device)
-
-    print("X_test.device", X_test.device)
-    print("test_desc.device", test_desc.device)
-    print("y_test.device", y_test.device)
     
     model.to(device)
     # MODEL TRAINING
@@ -80,17 +75,22 @@ def pipeline(
         test_desc, 
         y_test, 
         epochs=epochs, 
-        batch_size=1024, 
+        patience=early_stopping_patience,
+        min_delta=early_stopping_min_delta,
+        batch_size=batch_size, 
         lr=1e-4, 
         weight_decay=1e-4, 
         device=device, 
-        verbose=True
+        verbose=verbose
     )
 
     try:
         plot_losses(history)
     except:
-        print("Could not plot loss")
+        if verbose:
+            print("Could not plot loss")
+        else:
+            pass
 
     # EVALUATION
     auc = evaluate_model(
