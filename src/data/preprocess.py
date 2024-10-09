@@ -142,7 +142,8 @@ def balance_training_data(
 def preprocess_data(
         file_path: Union[str, Path] = Path("data/accepted_2007_to_2018Q4.csv"), 
         nlp_model: Callable = StanfordNLP(), 
-        concat_train_dev_sets: bool = False
+        concat_train_dev_sets: bool = False,
+        normalize_first: bool = False # False has to be implemented and tried
     ) -> pd.DataFrame:
     df = pd.read_csv(file_path)
 
