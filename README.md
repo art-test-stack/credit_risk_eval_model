@@ -130,6 +130,7 @@ A dropout strategy of 0.3 (value not precised in the article) is used for the TE
 The model is evaluated on the test-set using the [ROC-AUC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic) and G-MEAN metrics. The ROC-AUC is the area under the receiver operating characteristic curve, which is a plot of the true positive rate against the false positive rate. The G-MEAN is the geometric mean of the true positive rate and the true negative rate. The ROC-AUC is a measure of the model's ability to distinguish between the positive and negative classes, while the G-MEAN is a measure of the model's ability to balance the true positive and true negative rates. Both are effective metrics for imbalanced data sets [(Gong et al., 2017)](#references). 
 
 The G-mean is defined as follows:
+
 $$G_{mean} = \sqrt{\left(\frac{TP}{TP + FN}\right)\left(\frac{TN}{TN + FP}\right)}$$
 
 ## Results

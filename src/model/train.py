@@ -2,14 +2,13 @@ from src.eval.metric import ROCAUC, GMean
 from src.model.model import CREModel
 from utils import get_device, MODEL_DIR
 
-# from src.model.test import _eval_by_batch
-
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 
 from tqdm import tqdm
+
 
 class EarlyStopping:
     def __init__(self, patience=5, min_delta=0.05):
@@ -33,7 +32,6 @@ class EarlyStopping:
             self.counter += 1
             if self.counter >= self.patience:
                 self.early_stop = True
-
 
 def fit(
         model: nn.Module,
@@ -116,7 +114,7 @@ def fit(
 
             if early_stopping.save_model:
                 best_model_state = model.state_dict()
-                torch.save(best_model_state, model.path)
+                torch.save(MODEL_DIR.joinpath(best_model_state), model.name)
 
             if early_stopping.early_stop:
                 print(f"Early stopping at epoch {epoch}")
