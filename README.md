@@ -61,17 +61,17 @@ Hence, as mentioned in the article, I used the loans issued during the period of
 
 #### Comparison Table of Summary of the length of loan description
 
-|  **Paper samples** | | | | | | 
-|-|-|--------------------|-|-|-|
-| *Status* | Size  | Mean | Std | Q1 | Q2 | Q3|
-| Paid     | 59954 | 56.69| 45.80 | 30 | 45 |63|
-| Default  | 10534 | 55.78| 40.52 | 29 | 44 | 63|
-| All      | 70488 | 56.56|40.76| 29 | 45 | 63|
-| **Samples processed** | |  | | | | 
-|         | Size  | Mean | Std | Q1 | Q2 | Q3|
-| Paid    | 58742 | 60.96 | 60.95 | 32 | 47 | 64 |
-| Default | 10151 | 61.52 | 58.24 | 21 | 46 | 64 |
-| All     | 69276 | 61.04 | 54.64 | 31  | 47 | 64 |
+|  **Paper samples**     | | | | | | | 
+|-|-|-|-|-|-|-|
+| *Status* | Size  | Mean  | Std   | Q1 | Q2 | Q3 |
+| Paid     | 59954 | 56.69 | 45.80 | 30 | 45 | 63 |
+| Default  | 10534 | 55.78 | 40.52 | 29 | 44 | 63 |
+| All      | 70488 | 56.56 | 40.76 | 29 | 45 | 63 |
+| **Samples processed** ||||       |    |         |
+|          | Size  | Mean  | Std   | Q1 | Q2 | Q3 |
+| Paid     | 58742 | 60.96 | 60.95 | 32 | 47 | 64 |
+| Default  | 10151 | 61.52 | 58.24 | 21 | 46 | 64 |
+| All      | 69276 | 61.04 | 54.64 | 31 | 47 | 64 |
 
 #### Comparison of cross Table on Continuous Variables for LendingClub Data (from paper's and processed's data)
 
@@ -117,9 +117,9 @@ After tokenizing the words, I used a pre-trained word vectors model named [GloVe
 
 ## The model
 
-The base of the model used is a Transformer Encoder (TE) model from [Vaswani et al. (2017)](#references). The textual features processed are then fed into the TE. As in the original paper, the TE is composed of 1 layers, with 8 heads for the multi-head attention mechanism, and feed-forward networks (FFN) has a size of 50 neurons and the activation function used is the rectified linear unit (ReLU) function. Then, as the TE is considered here as a feature exctractor, only the first sequence of the output of the TE is used. It's concatenated with the hard features and fed into a feed-forward neural network (FNN) with 2 hidden layers of 10 neurons each, separated by a ReLU activation function. The output layer is two neurons fed into a Softmax output. 
+The base of the model used is a Transformer Encoder (TE) model from [Vaswani et al. (2017)](#references). The textual features processed are then fed into the TE. As in the original paper, the TE is composed of 1 layers, with 8 heads for the multi-head attention mechanism, and feed-forward networks (FFN) has a size of 50 neurons and the activation function used is the rectified linear unit (ReLU) function. Then, as the TE is considered here as a feature exctractor, only the first sequence of the output of the TE is used. It's concatenated with the hard features and fed into a feed-forward neural network (FNN) with 2 hidden layers of 10 neurons each, separated by a ReLU activation function. The output layer consists of two neurons passed through a Softmax layer.
 
-The model is trained with a binary cross-entropy loss function and the Adam optimizer. The model is trained with a batch size of 1024 and a learning rate of 0.0001. The model is trained on an early-stopping strategy. The model is evaluated on the test set using the ROC-AUC and G-MEAN metrics, developped in [Metrics](#metrics) section.
+The model is trained with a binary cross-entropy loss function and the Adam optimizer with a learning rate of 0.0001 and weight decay of 0.0001 to avoid over-fitting. An early-stopping strategy is applied on training. The model is evaluated on the test set using the ROC-AUC and G-MEAN metrics, developped in [Metrics](#metrics) section.
 
 A dropout strategy of 0.3 (value not precised in the article) is used for the TE and after each layer of the FNN to avoid overfitting.
 
