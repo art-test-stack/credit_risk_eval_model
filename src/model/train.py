@@ -114,7 +114,7 @@ def fit(
 
             if early_stopping.save_model:
                 best_model_state = model.state_dict()
-                torch.save(MODEL_DIR.joinpath(best_model_state), model.name)
+                torch.save(best_model_state, MODEL_DIR.joinpath(model.name))
 
             if early_stopping.early_stop:
                 print(f"Early stopping at epoch {epoch}")
