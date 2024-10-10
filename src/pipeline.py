@@ -117,5 +117,6 @@ def pipeline(
         device=device
     )
 
+    print("Model name:", model.name)
     print(f"AUC: {100 * auc:.2f}, GM: {100 * gmean:.2f}")
 
