@@ -64,14 +64,14 @@ class StanfordNLP:
             padding = np.zeros((max_length - len(embeddings), embeddings.shape[1]))
             return np.vstack((embeddings, padding))
 
-    def embbed_tokens(self, tokens: List[str]) -> np.ndarray:
+    def embed_tokens(self, tokens: List[str]) -> np.ndarray:
         emb = np.array([ self.glove.vocab.get_vector(tok) for tok in tokens ])
         emb = self.pad_embeddings(emb, 200)
         return emb
     
     def __call__(self, text: str) -> Tuple[List[str], np.ndarray]:
         tokens = self.tokenize(text)
-        emb = self.embbed_tokens(tokens)
+        emb = self.embed_tokens(tokens)
         return emb
     
     def process_batch(

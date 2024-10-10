@@ -1,4 +1,5 @@
 # Repository files
+text_processing.ipynb
 notes.md
 /data/*
 !/data/README.md
@@ -19,6 +20,7 @@ notebooks/
 archives/
 
 *.props
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
