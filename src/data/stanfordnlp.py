@@ -40,6 +40,7 @@ class StanfordNLP:
         self.embedding_dim = emb_dim
 
     def load_spacy_glove(self, glove_file_path: str) -> spacy.language.Language:
+        # TODO: use https://huggingface.co/docs/evaluate/custom_evaluator#spacy instead
         nlp = spacy.blank("en")
         with open(glove_file_path, 'r', encoding='utf-8') as f:
             for line in f:
